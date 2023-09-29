@@ -49,7 +49,7 @@ func (d *Downloader) DownloadAndProcess(ctx context.Context, link string) error 
 	}
 
 	// Here, send the link to the processing queue
-	// ...
+	// TODO: Send link to processing queue
 
 	return nil
 }
