@@ -13,9 +13,16 @@ import (
 	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file from current directory
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
 	// Load Configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
