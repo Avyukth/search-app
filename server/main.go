@@ -52,7 +52,7 @@ func main() {
 	app.Use(logger.New())
 
 	// Setup Router
-	router.SetupRouter(app, db)
+	router.SetupRoutes(app, db)
 
 	// Start Server
 	go func() {
