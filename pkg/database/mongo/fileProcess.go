@@ -51,7 +51,7 @@ func (db *Database) IsLinkProcessed(ctx context.Context, id string) (bool, error
 	var result LinkStatus
 	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBLinkCollectionName)
 
-	err := collection.FindOne(ctx, bson.M{"_id": id, "state": "processed"}).Decode(&result)
+	err := collection.FindOne(ctx, bson.M{"_id": id, "status": "processing"}).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		return false, nil
 	}
@@ -61,9 +61,42 @@ func (db *Database) IsLinkProcessed(ctx context.Context, id string) (bool, error
 	return true, nil
 }
 
-func (db *Database) MarkLinkAsProcessed(ctx context.Context, id string) error {
+func (db *Database) MarkLinkAsCompleted(ctx context.Context, id string) error {
 	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBLinkCollectionName)
 
-	_, err := collection.InsertOne(ctx, bson.M{"_id": id, "state": "processed"})
+	_, err := collection.InsertOne(ctx, bson.M{"_id": id, "status": "completed", "updatedAt": time.Now()})
 	return err
 }
+
+// func (d *Database) Download(ctx context.Context, url string, destPath string) error {
+// 	// Create the file
+// 	out, err := os.Create(destPath)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to create file: %w", err)
+// 	}
+// 	defer out.Close()
+
+// 	// Get the data
+// 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to create request: %w", err)
+// 	}
+
+// 	resp, err := http.DefaultClient.Do(req)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to download file: %w", err)
+// 	}
+// 	defer resp.Body.Close()
+
+// 	if resp.StatusCode != http.StatusOK {
+// 		return fmt.Errorf("server return non-200 status: %s", resp.Status)
+// 	}
+
+// 	// Write the body to file
+// 	_, err = io.Copy(out, resp.Body)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to write file: %w", err)
+// 	}
+
+// 	return nil
+// }

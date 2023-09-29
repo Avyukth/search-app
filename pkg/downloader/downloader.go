@@ -7,10 +7,9 @@ import (
 	"net/http"
 )
 
-// LinkProcessor is an interface that defines methods to interact with the storage of processed links.
 type LinkProcessor interface {
 	IsLinkProcessed(ctx context.Context, id string) (bool, error)
-	MarkLinkAsProcessed(ctx context.Context, id string) error
+	MarkLinkAsCompleted(ctx context.Context, id string) error
 }
 
 // Downloader is responsible for downloading and processing links.
@@ -41,11 +40,10 @@ func (d *Downloader) DownloadAndProcess(ctx context.Context, link string) error 
 	}
 
 	if processed {
-		return nil // or a custom error indicating the link has been processed
+		return nil
 	}
 
-	// Send the link to the processing queue and mark it as processed in the database
-	err = d.processor.MarkLinkAsProcessed(ctx, id)
+	err = d.processor.MarkLinkAsCompleted(ctx, id)
 	if err != nil {
 		return err
 	}

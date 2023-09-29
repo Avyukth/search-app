@@ -35,7 +35,7 @@ func LoadConfig() (*Config, error) {
 	cfg.MongoPassword = getEnv("MONGO_PASSWORD", "example")
 	cfg.RedisPassword = getEnv("REDIS_PASSWORD", "yourpassword")
 	cfg.RedisAddress = getEnv("REDIS_ADDRESS", "localhost:6379")
-	cfg.MongoURI = getEnv("MONGODB_URI", "mongodb://root:example@localhost:27017/?directConnection=true")
+	cfg.MongoURI = getEnv("MONGODB_URI", "mongodb://%s:%s@localhost:27017")
 	cfg.MongoDatabase = getEnv("MONGODB_DATABASE", "searchDB")
 	cfg.Server = getEnv("SERVER", "localhost")
 	cfg.MongoContainerName = getEnv("MONGO_CONTAINER_NAME", "mongodb-search")
