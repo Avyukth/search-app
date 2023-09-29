@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -22,10 +23,16 @@ func main() {
 	}
 
 	// Setup Database Connection
-	db, err := mongo.SetupDatabase(cfg)
+	db, mongoClient, err := mongo.SetupDatabase(cfg)
 	if err != nil {
 		log.Fatalf("Error setting up database: %v", err)
 	}
+
+	defer func() {
+		if err := mongoClient.Disconnect(context.TODO()); err != nil {
+			log.Fatalf("Error disconnecting from database: %v", err)
+		}
+	}()
 
 	// Setup Fiber App
 	app := fiber.New(fiber.Config{
