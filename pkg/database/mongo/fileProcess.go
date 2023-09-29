@@ -6,9 +6,12 @@ import (
 	"encoding/hex"
 	"time"
 
+	"github.com/avyukth/search-app/pkg/downloader"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/mgo.v2/bson"
 )
+
+var _ downloader.LinkProcessor = &Database{}
 
 // CheckAndSetLinkStatus checks the link status and sets it to processed if not already processed or completed
 func (db *Database) CheckAndSetLinkStatus(link string) (bool, error) {
@@ -42,4 +45,21 @@ func (db *Database) CheckAndSetLinkStatus(link string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (db *Database) IsLinkProcessed(ctx context.Context, id string) (bool, error) {
+	var result LinkStatus
+	err := db.linkCollection.FindOne(ctx, bson.M{"_id": id, "state": "processed"}).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (db *Database) MarkLinkAsProcessed(ctx context.Context, id string) error {
+	_, err := db.linkCollection.InsertOne(ctx, bson.M{"_id": id, "state": "processed"})
+	return err
 }

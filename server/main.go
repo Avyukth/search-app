@@ -30,13 +30,13 @@ func main() {
 	}
 
 	// Setup Database Connection
-	db, mongoClient, err := mongo.SetupDatabase(cfg)
+	db, err := mongo.SetupDatabase(cfg)
 	if err != nil {
 		log.Fatalf("Error setting up database: %v", err)
 	}
 
 	defer func() {
-		if err := mongoClient.Disconnect(context.TODO()); err != nil {
+		if err := db.Client.Disconnect(context.TODO()); err != nil {
 			log.Fatalf("Error disconnecting from database: %v", err)
 		}
 	}()

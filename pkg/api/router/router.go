@@ -2,9 +2,9 @@ package router
 
 import (
 	"github.com/avyukth/search-app/pkg/api/handler"
+	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // SetupRoutes sets up all the routes for your application

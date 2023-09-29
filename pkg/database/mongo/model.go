@@ -3,7 +3,9 @@ package mongo
 import (
 	"time"
 
+	"github.com/avyukth/search-app/pkg/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type LinkStatus struct {
@@ -28,4 +30,10 @@ type Patent struct {
 type Index struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty"`
 	PatentObj Patent             `bson:"patentObj"`
+}
+
+type Database struct {
+	Client     *mongo.Client
+	Config     *config.Config
+	Collection *mongo.Collection
 }

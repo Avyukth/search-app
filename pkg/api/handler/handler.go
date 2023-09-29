@@ -35,3 +35,16 @@ func DownloadHandler(db *mongo.Database) fiber.Handler {
 		return c.SendString("Link is sent for processing")
 	}
 }
+
+func SearchHandler(db *mongo.Database) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Extract search parameters from the request
+		query := c.Query("query")
+		// Perform search operation using the database instance
+		results, err := db.Search(query)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
+		}
+		return c.JSON(results)
+	}
+}
