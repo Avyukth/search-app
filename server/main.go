@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	// "github.com/avyukth/search-app/pkg/api/router"
-	// "github.com/avyukth/search-app/pkg/config"
-	// "github.com/avyukth/search-app/pkg/database/mongo"
+	"github.com/avyukth/search-app/pkg/api/router"
+	"github.com/avyukth/search-app/pkg/config"
+	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
