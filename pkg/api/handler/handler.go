@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
@@ -40,11 +41,12 @@ func SearchHandler(db *mongo.Database) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Extract search parameters from the request
 		query := c.Query("query")
+		log.Println("******************Query", query)
 		// Perform search operation using the database instance
-		results, err := db.Search(query)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
-		}
-		return c.JSON(results)
+		// results, err := db.Search(query)
+		// if err != nil {
+		// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
+		// }
+		return c.JSON("Success")
 	}
 }

@@ -49,7 +49,9 @@ func (db *Database) CheckAndSetLinkStatus(link string) (bool, error) {
 
 func (db *Database) IsLinkProcessed(ctx context.Context, id string) (bool, error) {
 	var result LinkStatus
-	err := db.linkCollection.FindOne(ctx, bson.M{"_id": id, "state": "processed"}).Decode(&result)
+	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBLinkCollectionName)
+
+	err := collection.FindOne(ctx, bson.M{"_id": id, "state": "processed"}).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		return false, nil
 	}
@@ -60,6 +62,8 @@ func (db *Database) IsLinkProcessed(ctx context.Context, id string) (bool, error
 }
 
 func (db *Database) MarkLinkAsProcessed(ctx context.Context, id string) error {
-	_, err := db.linkCollection.InsertOne(ctx, bson.M{"_id": id, "state": "processed"})
+	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBLinkCollectionName)
+
+	_, err := collection.InsertOne(ctx, bson.M{"_id": id, "state": "processed"})
 	return err
 }
