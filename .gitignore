@@ -1,0 +1,27 @@
+# Go related
+/bin/
+/pkg/
+*.exe
+*.test
+*.out
+
+# Ignore Go Modules Directory
+/go/
+
+# Ignore build directory
+/build/
+
+# IDE/Editor folders
+.vscode/
+.idea/
+
+# Proto generated files
+/api/*.pb.go
+/api/*.pb.gw.go
+
+# Ignore environment variables
+.env
+.env.local
+
+.trunk
+/search-data/

@@ -1,0 +1,60 @@
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Folders
+_obj
+_test
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+_testmain.go
+
+*.exe
+*.test
+*.prof
+
+# Go related
+/bin/
+/pkg/
+
+# Ignore Go Modules Directory
+/go/
+
+# Ignore build directory
+/build/
+
+# IDE/Editor folders
+.vscode/
+.idea/
+
+# Proto generated files
+/api/*.pb.go
+/api/*.pb.gw.go
+
+# Ignore environment variables
+.env
+.env.local
+
+# Miscellaneous
+*.log
+*.swp
+*.swx
+*.swo
+*.out
+.DS_Store
+
+# Ignore the search-data directory
+/search-data/
+
+# Ignore the trunk directory
+.trunk
