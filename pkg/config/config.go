@@ -17,7 +17,7 @@ type Config struct {
 	MongoURI                     string
 	MongoDatabase                string
 	MongoMaxPoolSize             uint64
-	Port                         int
+	ServerPort                         int
 	RedisTimeout                 time.Duration
 	Server                       string
 	MongoContainerName           string
@@ -28,7 +28,7 @@ type Config struct {
 }
 
 // LoadConfig loads configuration from environment variables
-func LoadConfig() *Config {
+func LoadConfig() (*Config, error) {
 	var cfg Config
 
 	cfg.MongoUsername = getEnv("MONGO_USERNAME", "root")
@@ -44,12 +44,12 @@ func LoadConfig() *Config {
 	cfg.MongoDBIndexCollectionName = getEnv("MONGODB_INDEX_COLLECTION_NAME", "indexPatent")
 	cfg.MongoDBLinkCollectionName = getEnv("MONGODB_LINK_COLLECTION_NAME", "downloadLink")
 
-	cfg.Port = getEnvAsInt("PORT", 40051)
+	cfg.ServerPort = getEnvAsInt("PORT", 40051)
 	cfg.RedisDB = getEnvAsInt("REDIS_DB", 0)
 	cfg.MongoMaxPoolSize = getEnvAsUInt("MONGODB_MAX_POOL_SIZE", 10)
 	cfg.RedisTimeout = time.Duration(getEnvAsInt("REDIS_TIMEOUT", 10)) * time.Second
 
-	return &cfg
+	return &cfg, nil
 }
 
 // getEnv gets an environment variable or returns a default value
