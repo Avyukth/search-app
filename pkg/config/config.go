@@ -17,7 +17,7 @@ type Config struct {
 	MongoURI                     string
 	MongoDatabase                string
 	MongoMaxPoolSize             uint64
-	ServerPort                         int
+	ServerPort                   int
 	RedisTimeout                 time.Duration
 	Server                       string
 	MongoContainerName           string
