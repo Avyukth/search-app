@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
+	"github.com/avyukth/search-app/pkg/indexer"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -37,16 +38,16 @@ func DownloadHandler(db *mongo.Database) fiber.Handler {
 	}
 }
 
-func SearchHandler(db *mongo.Database) fiber.Handler {
+func SearchHandler(db *mongo.Database, searchEngiene indexer.SearchEngine) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Extract search parameters from the request
 		query := c.Query("query")
 		log.Println("******************Query", query)
 		// Perform search operation using the database instance
-		// results, err := db.Search(query)
-		// if err != nil {
-		// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
-		// }
-		return c.JSON("Success")
+		results, err := searchEngiene.SearchAndRetrievePatents(query)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
+		}
+		return c.JSON(results)
 	}
 }

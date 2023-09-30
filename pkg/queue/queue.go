@@ -15,14 +15,14 @@ type TaskQueue struct {
 	wg       *sync.WaitGroup
 	parser   *parser.Parser
 	dbClient *mongo.Database
-	indexer  *indexer.Indexer
+	indexer  *indexer.SearchEngine
 }
 
 type Task struct {
 	FilePath string
 }
 
-func NewTaskQueue(size int, parser *parser.Parser, dbClient *mongo.Database, indexer *indexer.Indexer) *TaskQueue {
+func NewTaskQueue(size int, parser *parser.Parser, dbClient *mongo.Database, indexer *indexer.SearchEngine) *TaskQueue {
 	return &TaskQueue{
 		tasks:    make(chan Task, size),
 		wg:       &sync.WaitGroup{},
@@ -71,19 +71,19 @@ func (q *TaskQueue) processTask(ctx context.Context, task Task) error {
 	}
 
 	// 3. Build Patent Object from parsedData and xmlID
-	patent, err := buildPatent(parsedData, xmlID)
+	patent, err := q.parser.BuildPatent(parsedData, xmlID)
 	if err != nil {
 		return err
 	}
 
 	// 4. Store Patent Object to MongoDB
-	err = q.dbClient.StorePatent(patent)
+	_, err = q.dbClient.StorePatent(patent)
 	if err != nil {
 		return err
 	}
 
 	// 5. Build Search Index
-	err = q.indexer.BuildIndex(patent, xmlID)
+	err = q.indexer.IndexPatent(patent)
 	if err != nil {
 		return err
 	}

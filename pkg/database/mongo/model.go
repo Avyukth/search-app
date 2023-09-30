@@ -17,14 +17,14 @@ type LinkStatus struct {
 }
 
 type Patent struct {
-	ID              primitive.ObjectID `bson:"_id,omitempty"`
-	PatentTitle     string             `bson:"patentTitle"`
-	PatentNumber    string             `bson:"patentNumber"`
-	InventorNames   []string           `bson:"inventorNames"`
-	AssigneeName    string             `bson:"assigneeName"`
-	ApplicationDate string             `bson:"applicationDate"`
-	IssueDate       string             `bson:"issueDate"`
-	DesignClass     string             `bson:"designClass,omitempty"`
+	PatentTitle     string   `bson:"patentTitle"`
+	PatentNumber    string   `bson:"patentNumber"`
+	InventorNames   []string `bson:"inventorNames"`
+	AssigneeName    string   `bson:"assigneeName"`
+	ApplicationDate string   `bson:"applicationDate"`
+	IssueDate       string   `bson:"issueDate"`
+	DesignClass     string   `bson:"designClass,omitempty"`
+	PatentStorageID string   `bson:"patentStorageID"`
 }
 
 type Index struct {
