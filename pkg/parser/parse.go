@@ -134,31 +134,52 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
-	"strings"
+	"sync"
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
+	"github.com/clbanning/mxj/v2"
 )
 
-type Parser interface {
-	Parse(filePath string) (*mongo.UsPatentGrant, error)
+type Parser struct {
+	errCh chan error
+	wg    *sync.WaitGroup
 }
 
-type fileParser struct{}
-
-func NewParser() Parser {
-	return &fileParser{}
+func NewParser() *Parser {
+	return &Parser{
+		errCh: make(chan error),
+		wg:    &sync.WaitGroup{},
+	}
 }
 
-func (p *fileParser) Parse(filePath string) (*mongo.UsPatentGrant, error) {
+func (p *Parser) Parse(filePath string) (map[string]interface{}, error) {
+	xmlData, err := os.ReadFile(filePath)
+
+	if err != nil {
+		p.errCh <- fmt.Errorf("Error reading XML file %s: %v", filePath, err)
+		return nil, err
+	}
+
+	mv, err := mxj.NewMapXml(xmlData)
+	if err != nil {
+		p.errCh <- fmt.Errorf("Error unmarshalling XML from file %s: %v", filePath, err)
+		return nil, err
+	}
+	mv["indexing"] = false
+	return mv, nil
+}
+
+func (p *Parser) ParseToStruct(filePath string, storageID string) (*mongo.Patent, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %w", err)
 	}
 	defer file.Close()
 
-	byteValue, err := fs.ReadFile(file)
+	byteValue, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("error reading file: %w", err)
 	}
@@ -169,96 +190,89 @@ func (p *fileParser) Parse(filePath string) (*mongo.UsPatentGrant, error) {
 		return nil, fmt.Errorf("error unmarshalling XML: %w", err)
 	}
 
-	return &patentGrant, nil
+	return p.BuildPatent(&patentGrant, storageID)
 }
 
-type PatentBuilder interface {
-	BuildPatent(patentGrant *mongo.UsPatentGrant, storageID string) (*mongo.Patent, error)
-}
-
-type patentBuilder struct{}
-
-func NewPatentBuilder() PatentBuilder {
-	return &patentBuilder{}
-}
-
-func (pb *patentBuilder) BuildPatent(patentGrant *mongo.UsPatentGrant, storageID string) (*mongo.Patent, error) {
+func (p *Parser) BuildPatent(patentGrant *mongo.UsPatentGrant, storageID string) (*mongo.Patent, error) {
 	if patentGrant == nil {
 		return nil, errors.New("patentGrant cannot be nil")
 	}
 
-	patent := &mongo.Patent{
+	var inventorNames []string
+	for _, inventor := range patentGrant.UsBibliographicDataGrant.UsParties.Inventors.Inventor {
+		inventorNames = append(inventorNames, inventor.Addressbook.FirstName.Text+" "+inventor.Addressbook.LastName.Text)
+	}
+
+	patent := mongo.Patent{
 		PatentTitle:     patentGrant.UsBibliographicDataGrant.InventionTitle.Text,
 		PatentNumber:    patentGrant.UsBibliographicDataGrant.PublicationReference.DocumentID.DocNumber.Text,
-		InventorNames:   getInventorNames(patentGrant.UsBibliographicDataGrant.UsParties.Inventors.Inventor),
-		AssigneeName:    getAssigneeName(patentGrant.UsBibliographicDataGrant.Assignees.Assignee),
+		InventorNames:   inventorNames,
+		AssigneeName:    patentGrant.UsBibliographicDataGrant.Assignees.Assignee.Addressbook.Orgname.Text,
 		ApplicationDate: patentGrant.UsBibliographicDataGrant.ApplicationReference.DocumentID.Date.Text,
 		IssueDate:       patentGrant.UsBibliographicDataGrant.PublicationReference.DocumentID.Date.Text,
-		DesignClass:     getClassification(patentGrant.UsBibliographicDataGrant.ClassificationsCpc),
-		PatentStorageID: storageID,
 	}
 
-	return patent, nil
+	return &patent, nil
 }
 
-func getInventorNames(inventors []struct {
-	Addressbook struct {
-		FirstName struct {
-			Text string `xml:",chardata"`
-		}
-		LastName struct {
-			Text string `xml:",chardata"`
-		}
-	}
-}) []string {
-	var names []string
-	for _, inventor := range inventors {
-		names = append(names, inventor.Addressbook.FirstName.Text+" "+inventor.Addressbook.LastName.Text)
-	}
-	return names
-}
+// func getInventorNames(inventors []struct {
+// 	Addressbook struct {
+// 		FirstName struct {
+// 			Text string `xml:",chardata"`
+// 		}
+// 		LastName struct {
+// 			Text string `xml:",chardata"`
+// 		}
+// 	}
+// }) []string {
+// 	var names []string
+// 	for _, inventor := range inventors {
+// 		names = append(names, inventor.Addressbook.FirstName.Text+" "+inventor.Addressbook.LastName.Text)
+// 	}
+// 	return names
+// }
 
-func getAssigneeName(assignee Assignee) string {
-	return assignee.Name
-}
+// func getAssigneeName(assignee Assignee) string {
+// 	return assignee.Name
+// }
 
-func getClassification(classificationsCpc struct {
-	MainCpc struct {
-		ClassificationCpc struct {
-			Section struct {
-				Text string `xml:",chardata"`
-			}
-			Class struct {
-				Text string `xml:",chardata"`
-			}
-			Subclass struct {
-				Text string `xml:",chardata"`
-			}
-		} `xml:"classification-cpc"`
-	} `xml:"main-cpc"`
-}) Classification {
-	return Classification{
-		Section:  classificationsCpc.MainCpc.ClassificationCpc.Section.Text,
-		Class:    classificationsCpc.MainCpc.ClassificationCpc.Class.Text,
-		Subclass: classificationsCpc.MainCpc.ClassificationCpc.Subclass.Text,
-	}
-}
+// func getClassification(classificationsCpc struct {
+// 	MainCpc struct {
+// 		ClassificationCpc struct {
+// 			Section struct {
+// 				Text string `xml:",chardata"`
+// 			}
+// 			Class struct {
+// 				Text string `xml:",chardata"`
+// 			}
+// 			Subclass struct {
+// 				Text string `xml:",chardata"`
+// 			}
+// 		} `xml:"classification-cpc"`
+// 	} `xml:"main-cpc"`
+// }) Classification {
+// 	return Classification{
+// 		Section:  classificationsCpc.MainCpc.ClassificationCpc.Section.Text,
+// 		Class:    classificationsCpc.MainCpc.ClassificationCpc.Class.Text,
+// 		Subclass: classificationsCpc.MainCpc.ClassificationCpc.Subclass.Text,
+// 	}
+// }
 
-type Inventor struct {
-	FirstName string
-	LastName  string
-}
+// type Inventor struct {
+// 	FirstName string
+// 	LastName  string
+// }
 
-type Assignee struct {
-	Name string
-}
+// type Assignee struct {
+// 	Name string
+// }
 
-type ClassificationsCpc struct {
-	Classification string
-}
+// type ClassificationsCpc struct {
+// 	Classification string
+// }
 
-type Classification struct {
-	Section  string
-	Class    string
-	Subclass string
-}
+// type Classification struct {
+// 	Section  string
+// 	Class    string
+// 	Subclass string
+// }
