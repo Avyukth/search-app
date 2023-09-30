@@ -16,6 +16,7 @@ type TaskQueue struct {
 	parser   *parser.Parser
 	dbClient *mongo.Database
 	indexer  *indexer.SearchEngine
+	resume   chan struct{} // Channel to resume workers
 }
 
 type Task struct {
@@ -29,11 +30,13 @@ func NewTaskQueue(size int, parser *parser.Parser, dbClient *mongo.Database, ind
 		parser:   parser,
 		dbClient: dbClient,
 		indexer:  indexer,
+		resume:   make(chan struct{}), // Initialize the resume channel
 	}
 }
 
 func (q *TaskQueue) Enqueue(task Task) {
 	q.tasks <- task
+	q.resume <- struct{}{} // Send signal to resume a worker
 }
 
 func (q *TaskQueue) Start(ctx context.Context) {
@@ -50,41 +53,51 @@ func (q *TaskQueue) Stop() {
 
 func (q *TaskQueue) worker(ctx context.Context) {
 	defer q.wg.Done()
-	for task := range q.tasks {
-		if err := q.processTask(ctx, task); err != nil {
-			log.Printf("Error processing task %v: %v", task, err)
+	for {
+		select {
+		case task, ok := <-q.tasks:
+			if !ok {
+				return // exit if the tasks channel is closed
+			}
+			if err := q.processTask(ctx, task); err != nil {
+				log.Printf("Error processing task %v: %v", task, err)
+			}
+		case <-q.resume: // resume when a signal is received
+			continue
+		case <-ctx.Done():
+			return // exit if context is done
 		}
 	}
 }
 
 func (q *TaskQueue) processTask(ctx context.Context, task Task) error {
-	// 1. Parse the XML file
 	parsedData, err := q.parser.Parse(task.FilePath)
 	if err != nil {
+		log.Printf("Error parsing XML: %v", err)
 		return err
 	}
 
-	// 2. Store parsed XML to MongoDB
 	xmlID, err := q.dbClient.StoreXML(parsedData)
 	if err != nil {
+		log.Printf("Error storing XML to MongoDB: %v", err)
 		return err
 	}
 
-	// 3. Build Patent Object from parsedData and xmlID
 	patent, err := q.parser.BuildPatent(parsedData, xmlID)
 	if err != nil {
+		log.Printf("Error building patent: %v", err)
 		return err
 	}
 
-	// 4. Store Patent Object to MongoDB
 	_, err = q.dbClient.StorePatent(patent)
 	if err != nil {
+		log.Printf("Error storing patent to MongoDB: %v", err)
 		return err
 	}
 
-	// 5. Build Search Index
 	err = q.indexer.IndexPatent(patent)
 	if err != nil {
+		log.Printf("Error indexing patent: %v", err)
 		return err
 	}
 

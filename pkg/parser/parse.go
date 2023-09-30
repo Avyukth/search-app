@@ -16,9 +16,11 @@ type Parser struct {
 }
 
 func NewParser() *Parser {
-	return &Parser{}
+	return &Parser{
+		errCh: make(chan error),
+		wg:    &sync.WaitGroup{},
+	}
 }
-
 func (p *Parser) Parse(filePath string) (map[string]interface{}, error) {
 	xmlData, err := os.ReadFile(filePath)
 

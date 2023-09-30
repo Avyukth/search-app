@@ -10,6 +10,7 @@ import (
 type LinkProcessor interface {
 	IsLinkProcessed(ctx context.Context, id string) (bool, error)
 	MarkLinkAsCompleted(ctx context.Context, id string) error
+	MarkLinkAsProcessing(ctx context.Context, id string) error
 }
 
 // Downloader is responsible for downloading and processing links.
@@ -43,13 +44,122 @@ func (d *Downloader) DownloadAndProcess(ctx context.Context, link string) error 
 		return nil
 	}
 
-	err = d.processor.MarkLinkAsCompleted(ctx, id)
+	err = d.processor.MarkLinkAsProcessing(ctx, id)
 	if err != nil {
 		return err
 	}
 
 	// Here, send the link to the processing queue
 	// TODO: Send link to processing queue
+
+	return nil
+}
+
+func ExtractTarGz(gzipStream, dest string) error {
+	reader, err := os.Open(gzipStream)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	archive, err := gzip.NewReader(reader)
+	if err != nil {
+		return err
+	}
+	defer archive.Close()
+
+	tarReader := tar.NewReader(archive)
+
+	for {
+		header, err := tarReader.Next()
+		switch {
+		case err == io.EOF:
+			return nil
+		case err != nil:
+			return err
+		case header == nil:
+			continue
+		}
+
+		target := filepath.Join(dest, header.Name)
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if _, err := os.Stat(target); err != nil {
+				if err := os.MkdirAll(target, 0755); err != nil {
+					return err
+				}
+			}
+		case tar.TypeReg:
+			writer, err := os.Create(target)
+			if err != nil {
+				return err
+			}
+			if _, err := io.Copy(writer, tarReader); err != nil {
+				return err
+			}
+			writer.Close()
+		}
+	}
+}
+
+func WalkDir(filePath string, m *Manager, dbManager *database.DatabaseManager, queue *queue.TaskQueue, wg *sync.WaitGroup, errch chan<- error) error {
+	defer wg.Done()
+	err := filepath.Walk(filePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() || !strings.HasSuffix(strings.ToLower(info.Name()), ".xml") {
+			return nil
+		}
+
+		// Enqueue the task to the processing queue
+		task := queue.Task{FilePath: path}
+		queue.Enqueue(task)
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Downloader) sendToProcessingQueue(ctx context.Context, link string, id string) error {
+	destPath := "./downloads/" + id
+	err := Download(ctx, link, destPath)
+	if err != nil {
+		log.Printf("Error downloading file: %v", err)
+		return err
+	}
+
+	destDir := "./extracted/" + id
+	err = ExtractTarGz(destPath, destDir)
+	if err != nil {
+		log.Printf("Error extracting tar.gz: %v", err)
+		return err
+	}
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, 1)
+	err = WalkDir(destDir, m, dbManager, queue, &wg, errCh)
+	if err != nil {
+		log.Printf("Error walking directory: %v", err)
+		return err
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		if err != nil {
+			log.Printf("Error processing file: %v", err)
+			return err
+		}
+	}
 
 	return nil
 }
