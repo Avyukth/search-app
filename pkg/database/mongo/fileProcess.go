@@ -6,12 +6,12 @@ import (
 	"encoding/hex"
 	"time"
 
-	"github.com/avyukth/search-app/pkg/downloader"
+	// "github.com/avyukth/search-app/pkg/downloader"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
 )
 
-var _ downloader.LinkProcessor = &Database{}
+// var _ downloader.LinkProcessor = &Database{}
 
 // CheckAndSetLinkStatus checks the link status and sets it to processed if not already processed or completed
 func (db *Database) CheckAndSetLinkStatus(link string) (bool, error) {
