@@ -45,21 +45,20 @@ func main() {
 	httpClient := &http.Client{Timeout: 30 * time.Second,}
 	parser := parser.NewParser()
 
-	indexer, err := indexer.NewSearchEngine(cfg.IndexDirectory)
+	indexer, err := indexer.NewSearchEngine(cfg.ServerConfig.Storage + cfg.ServerConfig.IndexDirectory)
 	if err != nil {
 		log.Fatalf("Error loading configurations: %v", err)
 	}
 
-	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig) // Passing actual dependency
-	wk := worker.NewWorker(dl, parser, db, indexer)               // Passing actual dependencies
-	q := queue.NewTaskQueue(10, wk)                               // Passing actual dependencies
+	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig)
+	wk := worker.NewWorker(dl, parser, db, indexer)
+	q := queue.NewTaskQueue(10, wk)
 
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	q.Start(ctx)
 
-	
 	// Setup Fiber App
 	app := fiber.New(fiber.Config{
 		Prefork:       false,

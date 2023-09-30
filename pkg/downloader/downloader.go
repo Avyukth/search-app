@@ -54,7 +54,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, link string) (string, err
 		return "", fmt.Errorf("getting current working directory: %w", err)
 	}
 
-	destFolder := filepath.Join(dir, d.serverConfig.DataStoreDirectory)
+	destFolder := filepath.Join(dir, d.serverConfig.Storage, d.serverConfig.DataStoreDirectory)
 	if err := os.MkdirAll(destFolder, 0755); err != nil {
 		return "", fmt.Errorf("creating directory %s: %w", destFolder, err)
 	}
