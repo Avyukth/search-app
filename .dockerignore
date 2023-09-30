@@ -58,3 +58,4 @@ _testmain.go
 
 # Ignore the trunk directory
 .trunk
+storage/search-data/
