@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/avyukth/search-app/pkg/indexer"
@@ -32,9 +33,16 @@ func DownloadHandler(db *mongo.Database, q *queue.TaskQueue) fiber.Handler {
 		if !isSet {
 			return c.Status(fiber.StatusConflict).SendString("Link is already processed or completed")
 		}
+		var wg sync.WaitGroup
+
+		wg.Add(1)
 
 		// Send link to processing queue and return response
-		q.Enqueue(queue.Task{FilePath: link})
+		go func() {
+			defer wg.Done()
+			q.Enqueue(queue.Task{FilePath: link})
+		}()
+		// wg.Wait()
 		return c.SendString("Link is sent for processing")
 	}
 }
@@ -47,6 +55,7 @@ func SearchHandler(db *mongo.Database, searchEngine *indexer.SearchEngine) fiber
 
 		// Perform search operation using the search engine instance
 		results, err := searchEngine.SearchAndRetrievePatents(query)
+		log.Println("******************Results", results, err)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
 		}

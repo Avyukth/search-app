@@ -14,8 +14,8 @@ func SetupDatabase(cfg *config.Config) (*Database, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	uri := fmt.Sprintf(cfg.MongoURI, cfg.MongoUsername, cfg.MongoPassword)
-	clientOptions := options.Client().ApplyURI(uri).SetMaxPoolSize(cfg.MongoMaxPoolSize)
+	uri := fmt.Sprintf(cfg.MongoDBConfig.URI, cfg.MongoDBConfig.Username, cfg.MongoDBConfig.Password)
+	clientOptions := options.Client().ApplyURI(uri).SetMaxPoolSize(cfg.MongoDBConfig.MaxPoolSize)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
@@ -28,7 +28,7 @@ func SetupDatabase(cfg *config.Config) (*Database, error) {
 	db := &Database{
 		Client:     client,
 		Config:     cfg,
-		Collection: client.Database(cfg.MongoDatabase).Collection(cfg.MongoDBLinkCollectionName),
+		Collection: client.Database(cfg.MongoDBConfig.Database).Collection(cfg.MongoDBConfig.LinkCollectionName),
 	}
 
 	return db, nil

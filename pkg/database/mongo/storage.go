@@ -13,7 +13,7 @@ import (
 func (db *Database) StoreXML(data map[string]interface{}) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBStorageCollectionName)
+	collection := db.Client.Database(db.Config.MongoDBConfig.Database).Collection(db.Config.MongoDBConfig.StorageCollectionName)
 	// Insert the parsed XML data into the MongoDB collection
 	result, err := collection.InsertOne(ctx, bson.M(data))
 	if err != nil {
@@ -27,7 +27,7 @@ func (db *Database) StoreXML(data map[string]interface{}) (string, error) {
 func (db *Database) StorePatent(patent *Patent) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBIndexCollectionName)
+	collection := db.Client.Database(db.Config.MongoDBConfig.Database).Collection(db.Config.MongoDBConfig.IndexCollectionName)
 	// Insert the parsed Patent data into the MongoDB collection
 	result, err := collection.InsertOne(ctx, patent)
 	if err != nil {
@@ -42,7 +42,7 @@ func (db *Database) RetrievePatent(patentStorageID string) (*Patent, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBIndexCollectionName)
+	collection := db.Client.Database(db.Config.MongoDBConfig.Database).Collection(db.Config.MongoDBConfig.IndexCollectionName)
 
 	// Convert string ID to ObjectID
 	objID, err := primitive.ObjectIDFromHex(patentStorageID)
@@ -69,7 +69,7 @@ func (db *Database) RetrieveXML(xmlStorageID string) (map[string]interface{}, er
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	collection := db.Client.Database(db.Config.MongoDatabase).Collection(db.Config.MongoDBStorageCollectionName)
+	collection := db.Client.Database(db.Config.MongoDBConfig.Database).Collection(db.Config.MongoDBConfig.StorageCollectionName)
 
 	// Convert string ID to ObjectID
 	objID, err := primitive.ObjectIDFromHex(xmlStorageID)

@@ -116,14 +116,14 @@ func main() {
 	httpClient := &http.Client{}
 	parser := parser.NewParser()
 
-	indexer, err := indexer.NewSearchEngine()
+	indexer, err := indexer.NewSearchEngine(cfg.IndexDirectory)
 	if err != nil {
 		log.Fatalf("Error loading configurations: %v", err)
 	}
 
-	dl := downloader.NewDownloader(httpClient)      // Passing actual dependency
-	wk := worker.NewWorker(dl, parser, db, indexer) // Passing actual dependencies
-	q := queue.NewTaskQueue(10, wk)                 // Passing actual dependencies
+	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig) // Passing actual dependency
+	wk := worker.NewWorker(dl, parser, db, indexer)               // Passing actual dependencies
+	q := queue.NewTaskQueue(10, wk)                               // Passing actual dependencies
 
 	// Setup Fiber App
 	app := fiber.New(fiber.Config{
@@ -133,12 +133,12 @@ func main() {
 	})
 
 	// Setup Router
-	router.SetupRoutes(app, db, indexer.NewSearchEngine(), q)
+	router.SetupRoutes(app, db, indexer, q)
 
 	// Start Server
 	go func() {
-		log.Printf("Starting Server on port %d", cfg.ServerPort)
-		if err := app.Listen(fmt.Sprintf(":%d", cfg.ServerPort)); err != nil {
+		log.Printf("Starting Server on port %d", cfg.ServerConfig.Port)
+		if err := app.Listen(fmt.Sprintf(":%d", cfg.ServerConfig.Port)); err != nil {
 			log.Fatalf("Error starting the app: %v", err)
 		}
 	}()
