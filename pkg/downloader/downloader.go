@@ -1,13 +1,21 @@
 package downloader
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+
+	"github.com/avyukth/search-app/pkg/queue"
 )
 
 type LinkProcessor interface {
@@ -106,7 +114,7 @@ func ExtractTarGz(gzipStream, dest string) error {
 	}
 }
 
-func WalkDir(filePath string, m *Manager, dbManager *database.DatabaseManager, queue *queue.TaskQueue, wg *sync.WaitGroup, errch chan<- error) error {
+func WalkDir(filePath string, queue *queue.TaskQueue, wg *sync.WaitGroup, errch chan<- error) error {
 	defer wg.Done()
 	err := filepath.Walk(filePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -148,7 +156,7 @@ func (d *Downloader) sendToProcessingQueue(ctx context.Context, link string, id 
 
 	var wg sync.WaitGroup
 	errCh := make(chan error, 1)
-	err = WalkDir(destDir, m, dbManager, queue, &wg, errCh)
+	err = WalkDir(destDir, queue, &wg, errCh)
 	if err != nil {
 		log.Printf("Error walking directory: %v", err)
 		return err
@@ -167,7 +175,7 @@ func (d *Downloader) sendToProcessingQueue(ctx context.Context, link string, id 
 	return nil
 }
 
-func (d *Database) Download(ctx context.Context, url string, destPath string) error {
+func Download(ctx context.Context, url string, destPath string) error {
 	// Create the file
 	out, err := os.Create(destPath)
 	if err != nil {
