@@ -5,7 +5,6 @@ go 1.21.1
 require (
 	github.com/blevesearch/bleve/v2 v2.3.10
 	github.com/clbanning/mxj/v2 v2.7.0
-	github.com/dlsniper/debugger v0.6.0
 	github.com/gofiber/fiber/v2 v2.49.2
 	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.12.1
