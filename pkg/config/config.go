@@ -25,6 +25,8 @@ type Config struct {
 	MongoDBStorageCollectionName string
 	MongoDBIndexCollectionName   string
 	MongoDBLinkCollectionName    string
+	IndexDirectory               string
+	DataStoreDirectory           string
 }
 
 // LoadConfig loads configuration from environment variables
@@ -48,6 +50,8 @@ func LoadConfig() (*Config, error) {
 	cfg.RedisDB = getEnvAsInt("REDIS_DB", 0)
 	cfg.MongoMaxPoolSize = getEnvAsUInt("MONGODB_MAX_POOL_SIZE", 10)
 	cfg.RedisTimeout = time.Duration(getEnvAsInt("REDIS_TIMEOUT", 10)) * time.Second
+	cfg.IndexDirectory = getEnv("INDEX_DIRECTORY", "index")
+	cfg.DataStoreDirectory = getEnv("DATA_STORE_DIRECTORY", "search-data")
 
 	return &cfg, nil
 }

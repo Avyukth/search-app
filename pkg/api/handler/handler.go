@@ -6,11 +6,12 @@ import (
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/avyukth/search-app/pkg/indexer"
+	"github.com/avyukth/search-app/pkg/queue"
 	"github.com/gofiber/fiber/v2"
 )
 
 // DownloadHandler handles download requests for tar files
-func DownloadHandler(db *mongo.Database) fiber.Handler {
+func DownloadHandler(db *mongo.Database, q *queue.TaskQueue) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		link := c.Query("link")
 		if link == "" {
@@ -33,18 +34,19 @@ func DownloadHandler(db *mongo.Database) fiber.Handler {
 		}
 
 		// Send link to processing queue and return response
-		// TODO: Send link to processing queue
+		q.Enqueue(queue.Task{FilePath: link})
 		return c.SendString("Link is sent for processing")
 	}
 }
 
-func SearchHandler(db *mongo.Database, searchEngiene indexer.SearchEngine) fiber.Handler {
+func SearchHandler(db *mongo.Database, searchEngine *indexer.SearchEngine) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Extract search parameters from the request
 		query := c.Query("query")
 		log.Println("******************Query", query)
-		// Perform search operation using the database instance
-		results, err := searchEngiene.SearchAndRetrievePatents(query)
+
+		// Perform search operation using the search engine instance
+		results, err := searchEngine.SearchAndRetrievePatents(query)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
 		}
