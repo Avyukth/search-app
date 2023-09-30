@@ -94,7 +94,7 @@ func (w *taskWorker) processFile(filePath string) error {
 	}
 	log.Printf("Successfully stored parsed data to MongoDB with ID: %s", xmlID)
 
-	patent, err := w.parser.BuildPatent(parsedData, xmlID)
+	patent, err := w.parser.ParseToStruct(filePath, xmlID)
 	if err != nil {
 		return err
 	}

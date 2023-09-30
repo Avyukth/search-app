@@ -135,7 +135,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"sync"
 
@@ -210,6 +209,8 @@ func (p *Parser) BuildPatent(patentGrant *mongo.UsPatentGrant, storageID string)
 		AssigneeName:    patentGrant.UsBibliographicDataGrant.Assignees.Assignee.Addressbook.Orgname.Text,
 		ApplicationDate: patentGrant.UsBibliographicDataGrant.ApplicationReference.DocumentID.Date.Text,
 		IssueDate:       patentGrant.UsBibliographicDataGrant.PublicationReference.DocumentID.Date.Text,
+		DesignClass:     patentGrant.UsBibliographicDataGrant.ClassificationsCpc.MainCpc.ClassificationCpc.Section.Text,
+		PatentStorageID: storageID,
 	}
 
 	return &patent, nil
