@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
@@ -43,13 +42,12 @@ func SearchHandler(db *mongo.Database, searchEngine *indexer.SearchEngine) fiber
 	return func(c *fiber.Ctx) error {
 		// Extract search parameters from the request
 		query := c.Query("query")
-		log.Println("******************Query", query)
 
 		// Perform search operation using the search engine instance
 		results, err := searchEngine.SearchAndRetrievePatents(query)
-		log.Println("******************Results", results, err)
+
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 		return c.JSON(results)
 	}
