@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"sync"
 
@@ -35,7 +36,6 @@ func (p *Parser) Parse(filePath string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	mv["indexing"] = false
-
 	return mv, nil
 }
 
@@ -46,6 +46,8 @@ func (p *Parser) BuildPatent(data map[string]interface{}, storageID string) (*mo
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling data: %v", err)
 	}
+
+	log.Println("JSON parsed XML file: ", jsonData)
 
 	err = json.Unmarshal(jsonData, &patent)
 	if err != nil {

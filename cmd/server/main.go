@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/avyukth/search-app/pkg/api/router"
 	"github.com/avyukth/search-app/pkg/config"
@@ -41,7 +42,7 @@ func main() {
 	defer db.Client.Disconnect(context.TODO())
 
 	// Initialize components
-	httpClient := &http.Client{}
+	httpClient := &http.Client{Timeout: 30 * time.Second,}
 	parser := parser.NewParser()
 
 	indexer, err := indexer.NewSearchEngine(cfg.IndexDirectory)
@@ -53,6 +54,12 @@ func main() {
 	wk := worker.NewWorker(dl, parser, db, indexer)               // Passing actual dependencies
 	q := queue.NewTaskQueue(10, wk)                               // Passing actual dependencies
 
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	q.Start(ctx)
+
+	
 	// Setup Fiber App
 	app := fiber.New(fiber.Config{
 		Prefork:       false,

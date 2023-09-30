@@ -87,6 +87,7 @@ func (w *taskWorker) processFile(filePath string) error {
 	}
 	log.Printf("Successfully parsed file at: %s", filePath)
 
+	log.Println("Storing parsed data to MongoDB", parsedData)
 	xmlID, err := w.dbClient.StoreXML(parsedData)
 	if err != nil {
 		return err

@@ -3,7 +3,6 @@ package handler
 import (
 	"log"
 	"net/http"
-	"sync"
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/avyukth/search-app/pkg/indexer"
@@ -33,16 +32,9 @@ func DownloadHandler(db *mongo.Database, q *queue.TaskQueue) fiber.Handler {
 		if !isSet {
 			return c.Status(fiber.StatusConflict).SendString("Link is already processed or completed")
 		}
-		var wg sync.WaitGroup
-
-		wg.Add(1)
 
 		// Send link to processing queue and return response
-		go func() {
-			defer wg.Done()
-			q.Enqueue(queue.Task{FilePath: link})
-		}()
-		// wg.Wait()
+		q.Enqueue(queue.Task{FilePath: link})
 		return c.SendString("Link is sent for processing")
 	}
 }
