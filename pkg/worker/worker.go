@@ -92,10 +92,13 @@ func (w *taskWorker) Process(ctx context.Context, task queue.Task) error {
 	}
 	log.Printf("Successfully downloaded file to: %s", filePath)
 
-	extractedPath, err := w.downloader.
-
-		// Parse the downloaded file
-		log.Printf("Attempting to parse file at: %s", extractedPath)
+	extractedPath, err := w.downloader.ExtractTarGz(filePath)
+	if err != nil {
+		log.Printf("Error extracting file from %s: %v", filePath, err)
+		return err
+	}
+	// Parse the downloaded file
+	log.Printf("Attempting to parse file at: %s", extractedPath)
 	parsedData, err := w.parser.Parse(filePath)
 	if err != nil {
 		log.Printf("Error parsing file at %s: %v", filePath, err)
