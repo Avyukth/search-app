@@ -188,8 +188,8 @@ func (pb *patentBuilder) BuildPatent(patentGrant *mongo.UsPatentGrant, storageID
 	}
 
 	patent := &mongo.Patent{
-		Title:           patentGrant.UsBibliographicDataGrant.InventionTitle.Text,
-		Number:          patentGrant.UsBibliographicDataGrant.PublicationReference.DocumentID.DocNumber.Text,
+		PatentTitle:     patentGrant.UsBibliographicDataGrant.InventionTitle.Text,
+		PatentNumber:    patentGrant.UsBibliographicDataGrant.PublicationReference.DocumentID.DocNumber.Text,
 		InventorNames:   getInventorNames(patentGrant.UsBibliographicDataGrant.UsParties.Inventors.Inventor),
 		AssigneeName:    getAssigneeName(patentGrant.UsBibliographicDataGrant.Assignees.Assignee),
 		ApplicationDate: patentGrant.UsBibliographicDataGrant.ApplicationReference.DocumentID.Date.Text,
@@ -201,24 +201,52 @@ func (pb *patentBuilder) BuildPatent(patentGrant *mongo.UsPatentGrant, storageID
 	return patent, nil
 }
 
-func getInventorNames(inventors []Inventor) string {
+func getInventorNames(inventors []struct {
+	Addressbook struct {
+		FirstName struct {
+			Text string `xml:",chardata"`
+		}
+		LastName struct {
+			Text string `xml:",chardata"`
+		}
+	}
+}) []string {
 	var names []string
 	for _, inventor := range inventors {
-		names = append(names, inventor.Name)
+		names = append(names, inventor.Addressbook.FirstName.Text+" "+inventor.Addressbook.LastName.Text)
 	}
-	return strings.Join(names, ", ")
+	return names
 }
 
 func getAssigneeName(assignee Assignee) string {
 	return assignee.Name
 }
 
-func getClassification(classificationsCpc ClassificationsCpc) string {
-	return classificationsCpc.Classification
+func getClassification(classificationsCpc struct {
+	MainCpc struct {
+		ClassificationCpc struct {
+			Section struct {
+				Text string `xml:",chardata"`
+			}
+			Class struct {
+				Text string `xml:",chardata"`
+			}
+			Subclass struct {
+				Text string `xml:",chardata"`
+			}
+		} `xml:"classification-cpc"`
+	} `xml:"main-cpc"`
+}) Classification {
+	return Classification{
+		Section:  classificationsCpc.MainCpc.ClassificationCpc.Section.Text,
+		Class:    classificationsCpc.MainCpc.ClassificationCpc.Class.Text,
+		Subclass: classificationsCpc.MainCpc.ClassificationCpc.Subclass.Text,
+	}
 }
 
 type Inventor struct {
-	Name string
+	FirstName string
+	LastName  string
 }
 
 type Assignee struct {
@@ -227,4 +255,10 @@ type Assignee struct {
 
 type ClassificationsCpc struct {
 	Classification string
+}
+
+type Classification struct {
+	Section  string
+	Class    string
+	Subclass string
 }
