@@ -68,16 +68,21 @@ func (w *taskWorker) walkDir(dirPath string) error {
 	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			log.Printf("Error accessing path %q: %v\n", path, err)
-			return err
-		}
-
-		if info.IsDir() {
-			log.Printf("Skipping directory: %s\n", path)
 			return nil
 		}
 
+		if info.IsDir() {
+			return nil
+		}
+
+		// if strings.HasSuffix(strings.ToLower(info.Name()), ".zip") || strings.HasSuffix(strings.ToLower(info.Name()), ".tar") || strings.HasSuffix(strings.ToLower(info.Name()), ".tar.gz") {
+		// 	if err := ExtractAndDeleteArchive(path, info); err != nil {
+		// 		log.Printf("Error processing archive file %s: %v", path, err)
+		// 	}
+		// 	return nil
+		// }
+
 		if !strings.HasSuffix(strings.ToLower(info.Name()), ".xml") {
-			log.Printf("Skipping non-XML file: %s\n", path)
 			return nil
 		}
 
@@ -94,7 +99,6 @@ func (w *taskWorker) walkDir(dirPath string) error {
 
 	if err != nil {
 		log.Printf("Error walking the path %v: %v\n", dirPath, err)
-		return err
 	}
 
 	wg.Wait()
