@@ -13,7 +13,6 @@ COPY go.mod go.sum ./
 
 # Download dependencies
 RUN go mod tidy
-RUN go mod vendor
 
 # Copy the entire directory
 COPY . .
