@@ -8,8 +8,16 @@ import (
 )
 
 // Task represents a unit of work to be processed.
+type TaskType int
+
+const (
+	DownloadAndProcess TaskType = iota
+	WalkAndProcess
+)
+
 type Task struct {
 	FilePath string
+	Type     TaskType
 }
 
 // TaskProcessor is an interface that represents the ability to process tasks.

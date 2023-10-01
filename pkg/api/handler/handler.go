@@ -32,8 +32,12 @@ func DownloadHandler(db *mongo.Database, q *queue.TaskQueue) fiber.Handler {
 			return c.Status(fiber.StatusConflict).SendString("Link is already processed or completed")
 		}
 
+		task := queue.Task{
+			FilePath: link,
+			Type:     queue.DownloadAndProcess,
+		}
 		// Send link to processing queue and return response
-		q.Enqueue(queue.Task{FilePath: link})
+		q.Enqueue(task)
 		return c.SendString("Link is sent for processing")
 	}
 }
@@ -50,5 +54,21 @@ func SearchHandler(db *mongo.Database, searchEngine *indexer.SearchEngine) fiber
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 		return c.JSON(results)
+	}
+}
+
+func CrawlerHandler(db *mongo.Database, q *queue.TaskQueue) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		dirPath := c.Query("path")
+		if dirPath == "" {
+			return c.Status(fiber.StatusBadRequest).SendString("Path is required")
+		}
+
+		task := queue.Task{
+			FilePath: dirPath,
+			Type:     queue.WalkAndProcess,
+		}
+		q.Enqueue(task)
+		return c.SendString("Directory is sent for walking and processing")
 	}
 }

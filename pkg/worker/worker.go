@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -36,6 +37,17 @@ func NewWorker(d downloader.Downloader, p *parser.Parser, db *mongo.Database, i 
 }
 
 func (w *taskWorker) Process(ctx context.Context, task queue.Task) error {
+	switch task.Type {
+	case queue.DownloadAndProcess:
+		return w.DownExtractAndProcess(ctx, task)
+	case queue.WalkAndProcess:
+		return w.walkDir(task.FilePath)
+	default:
+		return fmt.Errorf("unsupported task type: %v", task.Type)
+	}
+}
+
+func (w *taskWorker) DownExtractAndProcess(ctx context.Context, task queue.Task) error {
 	log.Printf("Starting processing for task: %+v", task)
 	filePath, err := w.downloader.Download(ctx, task.FilePath)
 	if err != nil {
@@ -85,14 +97,11 @@ func (w *taskWorker) processFile(filePath string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Successfully parsed file at: %s", filePath)
 
-	log.Println("Storing parsed data to MongoDB", parsedData)
 	xmlID, err := w.dbClient.StoreXML(parsedData)
 	if err != nil {
 		return err
 	}
-	log.Printf("Successfully stored parsed data to MongoDB with ID: %s", xmlID)
 
 	patent, err := w.parser.ParseToStruct(filePath, xmlID)
 	if err != nil {
@@ -102,7 +111,6 @@ func (w *taskWorker) processFile(filePath string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Successfully built and stored the patent to MongoDB")
 
 	if err := w.indexer.IndexPatent(patent); err != nil {
 		return err

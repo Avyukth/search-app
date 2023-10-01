@@ -22,4 +22,5 @@ func SetupRoutes(app *fiber.App, db *mongo.Database, searchEngine *indexer.Searc
 	// Define your routes here
 	v1.Get("/search", handler.SearchHandler(db, searchEngine))
 	v1.Get("/download", handler.DownloadHandler(db, q))
+	v1.Get("/crawl", handler.CrawlerHandler(db, q))
 }
