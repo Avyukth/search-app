@@ -26,7 +26,6 @@ func NewSearchEngine(indexDir string) (*SearchEngine, error) {
 			return nil, err
 		}
 	} else if err != nil {
-		// Handle other os.Stat errors
 		return nil, err
 	} else {
 		// Open the existing index

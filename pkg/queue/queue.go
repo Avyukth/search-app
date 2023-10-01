@@ -30,7 +30,7 @@ type TaskQueue struct {
 	tasks     chan Task
 	wg        *sync.WaitGroup
 	processor TaskProcessor
-	resume    chan struct{} // Channel to resume workers
+	resume    chan struct{}
 }
 
 // NewTaskQueue creates a new TaskQueue with the given TaskProcessor and size.
@@ -40,7 +40,7 @@ func NewTaskQueue(size int, processor TaskProcessor) *TaskQueue {
 		tasks:     make(chan Task, size),
 		wg:        &sync.WaitGroup{},
 		processor: processor,
-		resume:    make(chan struct{}), // Initialize the resume channel
+		resume:    make(chan struct{}),
 	}
 	log.Println("TaskQueue Initialized.")
 	return q
@@ -52,7 +52,7 @@ func (q *TaskQueue) Enqueue(task Task) {
 	q.tasks <- task
 	log.Printf("Task: %+v enqueued.\n", task)
 	log.Println("Sending signal to resume a worker.")
-	q.resume <- struct{}{} // Send signal to resume a worker
+	q.resume <- struct{}{}
 	log.Println("Signal sent to resume a worker.")
 }
 
@@ -83,7 +83,7 @@ func (q *TaskQueue) worker(ctx context.Context) {
 		case task, ok := <-q.tasks:
 			if !ok {
 				log.Println("Tasks channel closed, exiting worker.")
-				return // exit if the tasks channel is closed
+				return
 			}
 			log.Printf("Processing task: %+v\n", task)
 			taskCtx, cancel := context.WithTimeout(ctx, 100*time.Second)
@@ -93,12 +93,12 @@ func (q *TaskQueue) worker(ctx context.Context) {
 				log.Printf("Task %+v processed successfully.\n", task)
 			}
 			cancel()
-		case <-q.resume: // resume when a signal is received
+		case <-q.resume:
 			log.Println("Worker resumed.")
 			continue
 		case <-ctx.Done():
 			log.Println("Context done, exiting worker.")
-			return // exit if context is done
+			return
 		}
 	}
 }

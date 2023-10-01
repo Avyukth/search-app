@@ -1,10 +1,5 @@
 
-# USPTO Design Patent Search Engine
-
-## Background
-
-The United States Patent and Trademark Office (USPTO) provides a dataset of design patents, which includes information about various design patents granted by the USPTO. This project aims to create a search engine that allows users to search for design patents based on various criteria.
-
+# Patent Search Engine
 ## Requirements
 
 - **Data Parsing**: The application downloads and parses the USPTO Design Patent dataset, available in XML format. The dataset can be obtained from [USPTO's official site](https://bulkdata.uspto.gov/data/patent/grant/redbook/2023/).
@@ -45,7 +40,6 @@ The system is designed to be scalable and efficient in handling large datasets. 
 
 1. **Clone the Repository**:
    ```sh
-   git clone <repository-url> search-app
    cd search-app
    ```
 
@@ -66,7 +60,7 @@ The system is designed to be scalable and efficient in handling large datasets. 
 
 5. **Run the Project using Docker Compose**:
    ```sh
-   make docker-compose-up
+   make all
    ```
 
 6. **View Logs**:
@@ -84,11 +78,32 @@ The system is designed to be scalable and efficient in handling large datasets. 
    make docker-compose-down
    ```
 
+## sample Data
+
+Sample data is available in the [sample-data](https://bitly.ws/W7f4) link. The data is in XML format, and can be imported into the database using the following command: 
+
+```sh
+curl --location --request GET 'http://localhost:40051/api/v1/download?link=https%3A%2F%2Fbitly.ws%2FW7f4' \
+--header 'Content-Type: application/json' \
+--data '{
+
+    
+}'
+
+```
+
+## sample Search
+Sample search api is for patent number 11696523
+
+```sh
+curl --location 'http://127.0.0.1:40051/api/v1/search?query=11696523'
+```
+
 ## Documentation
 
 For a detailed guide on how to use the search engine, including endpoints and example requests, refer to the provided Postman documentation available at [api.html](api.html).
 
-## Evaluation Criteria
+## Evaluation Criteria satisfied =
 
 **Candidate POV**
 
@@ -99,13 +114,5 @@ For a detailed guide on how to use the search engine, including endpoints and ex
 - [X] **Database Design**: MongoDB is used to store the data, ensuring scalability and performance.
 - [X] **Error Handling**: Comprehensive error handling is implemented to manage potential issues.
 - [X] **Overall Impression**: The project is well-executed, with efficient data parsing and retrieval mechanisms in place.
-
-## Deadline
-
-The project is expected to be completed and submitted within 5 days from the start date.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE.md file for details.
 
 
