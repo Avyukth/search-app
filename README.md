@@ -39,49 +39,74 @@ The system is designed to be scalable and efficient in handling large datasets. 
 ### Setup and Running
 
 1. **Clone the Repository**:
-   ```sh
+---
+```sh
    cd search-app
-   ```
+```
+---
+
+**Run the Project using Docker Compose**:
+
+---
+```sh
+   make all
+```
+---
 
 2. **Build the Database Docker Image and Start the Database Services**:
-   ```sh
+---
+```sh
    make build-db
-   ```
+```
+---
 
 3. **Build the Project**:
-   ```sh
+---
+```sh
    make build
-   ```
+```
+---
 
 4. **Run Tests**:
-   ```sh
+---
+```sh
    make test
-   ```
+```
+---
 
 5. **Run the Project using Docker Compose**:
-   ```sh
+---
+```sh
    make all
-   ```
+```
+---
 
 6. **View Logs**:
-   ```sh
+---
+```sh
    make docker-log
-   ```
+```
+---
 
 7. **Clean Up**:
-   ```sh
+---
+```sh
    make clean
-   ```
+```
+---
 
 8. **Stop the Docker Compose Services**:
-   ```sh
+---
+```sh
    make docker-compose-down
-   ```
+```
+---
 
 ## sample Data
 
 Sample data is available in the [sample-data](https://bitly.ws/W7f4) link. The data is in XML format, and can be imported into the database using the following command: 
 
+---
 ```sh
 curl --location --request GET 'http://localhost:40051/api/v1/download?link=https%3A%2F%2Fbitly.ws%2FW7f4' \
 --header 'Content-Type: application/json' \
@@ -91,13 +116,16 @@ curl --location --request GET 'http://localhost:40051/api/v1/download?link=https
 }'
 
 ```
+---
 
 ## sample Search
 Sample search api is for patent number 11696523
 
+---
 ```sh
 curl --location 'http://127.0.0.1:40051/api/v1/search?query=11696523'
 ```
+---
 
 ## Documentation
 
