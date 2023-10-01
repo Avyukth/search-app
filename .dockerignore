@@ -25,7 +25,6 @@ _testmain.go
 
 # Go related
 /bin/
-/pkg/
 
 # Ignore Go Modules Directory
 /go/
@@ -42,8 +41,6 @@ _testmain.go
 /api/*.pb.gw.go
 
 # Ignore environment variables
-.env
-.env.local
 
 # Miscellaneous
 *.log
