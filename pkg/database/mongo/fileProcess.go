@@ -6,8 +6,8 @@ import (
 	"encoding/hex"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // CheckAndSetLinkStatus checks the link status and sets it to processed if not already processed or completed

@@ -131,7 +131,7 @@ curl --location 'http://127.0.0.1:40051/api/v1/search?query=11696523'
 
 For a detailed guide on how to use the search engine, including endpoints and example requests, refer to the provided Postman documentation available at [api.html](api.html).
 
-## Evaluation Criteria satisfied =
+## Evaluation Criteria satisfied
 
 **Candidate POV**
 
