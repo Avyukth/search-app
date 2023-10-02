@@ -19,7 +19,7 @@ build-db:
 
 build: build-db
 	@echo "Building Search App Docker Image..."
-	docker build \
+	DOCKER_BUILDKIT=1 docker build \
 	--no-cache \
 	-f $(DOCKERFILE) \
 	-t $(IMAGE_NAME):$(VERSION) \

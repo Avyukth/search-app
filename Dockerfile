@@ -1,8 +1,9 @@
 # Build Stage
-FROM golang:1.21 as builder
+FROM  golang:1.21-bullseye as builder
 
 # Set Environment Variables
 ENV CGO_ENABLED=0
+ENV GOCACHE=/root/.cache/go-build
 ARG BUILD_REF
 
 # Set Work Directory
@@ -11,15 +12,15 @@ WORKDIR /app
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
-# Download dependencies
-RUN go mod tidy
+# Download dependencies and cache them
+RUN --mount=type=cache,target=/root/.cache/go-build go mod tidy
 
 # Copy the entire directory
 COPY . .
 
 # Build the application
 WORKDIR /app/cmd/server
-RUN go build -ldflags "-X main.build=${BUILD_REF}"
+RUN --mount=type=cache,target=/root/.cache/go-build go build -ldflags "-X main.build=${BUILD_REF}"
 
 # Runtime Stage
 FROM gcr.io/distroless/static-debian11
