@@ -1,0 +1,81 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: "Search App API"
+  description: "API for a Search Application that interacts with the USPTO Design Patent dataset."
+
+servers:
+  - url: http://localhost:40051/api/v1
+
+paths:
+  /search:
+    get:
+      summary: "Search for design patents"
+      description: "Allows users to search for design patents based on various criteria."
+      parameters:
+        - name: query
+          in: query
+          description: "Search query string"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Search results returned successfully"
+          content:
+            application/json:
+              example:
+                - id: "12345"
+                  title: "Design Patent 1"
+                  number: "US12345D"
+                  inventor: "John Doe"
+                  assignee: "ABC Corp."
+                  applicationDate: "2023-01-01"
+                  issueDate: "2023-01-02"
+                  designClass: "14-02"
+        "400":
+          description: "Bad Request. Invalid input."
+        "500":
+          description: "Internal Server Error."
+
+  /download:
+    get:
+      summary: "Download and process a file"
+      description: "Allows users to download and process a file from a given link."
+      parameters:
+        - name: link
+          in: query
+          description: "Link to the file to be downloaded and processed"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "File downloaded and processed successfully"
+        "400":
+          description: "Bad Request. Invalid input."
+        "404":
+          description: "Not Found. Link is not live."
+        "409":
+          description: "Conflict. Link is already processed or completed."
+        "500":
+          description: "Internal Server Error."
+
+  /crawl:
+    get:
+      summary: "Trigger the crawler"
+      description: "Allows users to trigger the crawler for a given path."
+      parameters:
+        - name: path
+          in: query
+          description: "Path to be crawled"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Crawler triggered successfully"
+        "400":
+          description: "Bad Request. Invalid input."
+        "500":
+          description: "Internal Server Error."

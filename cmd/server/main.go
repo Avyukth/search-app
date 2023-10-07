@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/avyukth/search-app/docs"
 	"github.com/avyukth/search-app/pkg/api/router"
 	"github.com/avyukth/search-app/pkg/config"
 	"github.com/avyukth/search-app/pkg/database/mongo"
@@ -19,7 +20,9 @@ import (
 	"github.com/avyukth/search-app/pkg/queue"
 	"github.com/avyukth/search-app/pkg/worker"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 	"github.com/joho/godotenv"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -53,7 +56,7 @@ func main() {
 	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig)
 	wk := worker.NewWorker(dl, parser, db, indexer)
 	q := queue.NewTaskQueue(10, wk)
-
+	swaggerURL := fmt.Sprintf("http://127.0.0.1:%d/docs/swagger.json", cfg.ServerConfig.Port)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -66,6 +69,13 @@ func main() {
 		CaseSensitive: true,
 		StrictRouting: true,
 	})
+
+	app.Static("/docs", "./docs")
+	app.Use(cors.New())
+
+	app.Get("/swagger/*", swagger.New(swagger.Config{
+		URL: swaggerURL,
+	}))
 
 	// Setup Router
 	router.SetupRoutes(app, db, indexer, q)
