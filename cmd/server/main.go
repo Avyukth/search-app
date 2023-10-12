@@ -56,7 +56,7 @@ func main() {
 	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig)
 	wk := worker.NewWorker(dl, parser, db, indexer)
 	q := queue.NewTaskQueue(10, wk)
-	swaggerURL := fmt.Sprintf("http://127.0.0.1:%d/docs/swagger.json", cfg.ServerConfig.Port)
+	swaggerURL := fmt.Sprintf("http://127.0.0.1:%d/docs/swagger.yaml", cfg.ServerConfig.Port)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

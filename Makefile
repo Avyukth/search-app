@@ -26,6 +26,14 @@ build: build-db
 	--build-arg BUILD_REF=$(VERSION) \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	.
+build-ind: 
+	DOCKER_BUILDKIT=1 docker build \
+	--no-cache \
+	-f $(DOCKERFILE) \
+	-t $(IMAGE_NAME):$(VERSION) \
+	--build-arg BUILD_REF=$(VERSION) \
+	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+	.
 
 docker-run:
 	docker-compose up -d

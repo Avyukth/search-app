@@ -18,7 +18,7 @@ func SetupRoutes(app *fiber.App, db *mongo.Database, searchEngine *indexer.Searc
 	// Routes
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
-
+	//go:generate swagger generate spec -o swagger.json
 	v1.Get("/search", handler.SearchHandler(db, searchEngine))
 	v1.Get("/download", handler.DownloadHandler(db, q))
 	v1.Get("/crawl", handler.CrawlerHandler(db, q))
