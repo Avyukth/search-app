@@ -35,6 +35,8 @@ type ServerConfig struct {
 	IndexDirectory     string
 	DataStoreDirectory string
 	Storage            string
+	ServiceName        string
+	ServiceVersion     string
 }
 
 // Config holds all configuration for our program.
@@ -71,6 +73,8 @@ func LoadConfig() (*Config, error) {
 			IndexDirectory:     getEnv("INDEX_DIRECTORY", "index"),
 			DataStoreDirectory: getEnv("DATA_STORE_DIRECTORY", "search-data"),
 			Storage:            getEnv("STORAGE_DIRECTORY", "storage"),
+			ServiceName:        getEnv("SERVICE_NAME", "search-app"),
+			ServiceVersion:     getEnv("SERVICE_VERSION", "1.0.0"),
 		},
 	}, nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	_ "github.com/avyukth/search-app/docs"
+	appTrace "github.com/avyukth/search-app/foundations/tracing"
 	"github.com/avyukth/search-app/pkg/api/router"
 	"github.com/avyukth/search-app/pkg/config"
 	"github.com/avyukth/search-app/pkg/database/mongo"
@@ -20,10 +22,11 @@ import (
 	"github.com/avyukth/search-app/pkg/queue"
 	"github.com/avyukth/search-app/pkg/worker"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 	"github.com/joho/godotenv"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 )
+
 
 func main() {
 	// Load .env file from current directory
@@ -36,6 +39,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading configurations: %v", err)
 	}
+
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	otelShutdown, err := appTrace.SetupOTelSDK(ctx, cfg.ServerConfig.ServiceName, cfg.ServerConfig.ServiceVersion)
+
+	defer func() {
+		err = errors.Join(err, otelShutdown(context.Background()))
+	}()
 
 	// Setup Database Connection
 	db, err := mongo.SetupDatabase(cfg)
