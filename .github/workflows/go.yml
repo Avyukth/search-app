@@ -13,28 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
 
-    - name: Run tests
-      run: make test
+      - name: Run tests
+        run: make test
 
-    - name: Build DB
-      run: make build-db
+      - name: Build DB
+        run: make build-db
 
-    - name: Build Docker Image
-      run: make build
+      - name: Build Docker Image
+        run: make build
 
-    - name: Run Docker Compose
-      run: make docker-compose-up
+      - name: Run Docker Compose
+        run: make docker-compose-up
 
-    - name: Clean up
-      run: make clean
+      - name: Clean up
+        run: make clean
 
-    - name: Show Docker logs
-      run: make docker-log
+      - name: Show Docker logs
+        run: make docker-log
