@@ -131,16 +131,3 @@ curl --location 'http://127.0.0.1:40051/api/v1/search?query=11696523'
 
 For a detailed guide on how to use the search engine, including endpoints and example requests, refer to the provided Postman documentation available at [api.html](api.html).
 
-## Evaluation Criteria satisfied
-
-**Candidate POV**
-
-- [X] **Functionality**: All Functionality Met
-- [X] **Efficiency**: Search is done in an efficient manner using optimized queries.
-- [X] **Code Quality**: Code adheres to Go Lang Best Practices.
-- [X] **Documentation**: [api.html](api.html) is well documented.
-- [X] **Database Design**: MongoDB is used to store the data, ensuring scalability and performance.
-- [X] **Error Handling**: Comprehensive error handling is implemented to manage potential issues.
-- [X] **Overall Impression**: The project is well-executed, with efficient data parsing and retrieval mechanisms in place.
-
-
