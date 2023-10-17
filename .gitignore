@@ -19,9 +19,6 @@
 /api/*.pb.gw.go
 
 # Ignore environment variables
-.env
-
-
 .trunk
 /search-data/
 searchdata.tar.gz
