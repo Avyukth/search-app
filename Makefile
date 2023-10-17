@@ -13,11 +13,11 @@ test:
 	go test ./... -count=1
 	staticcheck -checks=all ./...
 
-build-db:
-	@echo "Building DB Docker Image..."
-	docker-compose -f db.docker-compose.yml up -d
+# build-db:
+# 	@echo "Building DB Docker Image..."
+# 	docker-compose -f db.docker-compose.yml up -d
 
-build: build-db
+build:
 	@echo "Building Search App Docker Image..."
 	DOCKER_BUILDKIT=1 docker build \
 	--no-cache \

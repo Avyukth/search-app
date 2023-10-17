@@ -44,6 +44,7 @@ The system is designed to be scalable and efficient in handling large datasets. 
 
 ```sh
    cd search-app
+
 ```
 
 ---
@@ -54,76 +55,73 @@ The system is designed to be scalable and efficient in handling large datasets. 
 
 ```sh
    make all
+
 ```
 
 ---
 
-2. **Build the Database Docker Image and Start the Database Services**:
-
----
-
-```sh
-   make build-db
-```
-
----
-
-3. **Build the Project**:
+2. **Build the Project**:
 
 ---
 
 ```sh
    make build
+
 ```
 
 ---
 
-4. **Run Tests**:
+3. **Run Tests**:
 
 ---
 
 ```sh
    make test
+
 ```
 
 ---
 
-5. **Run the Project using Docker Compose**:
+4. **Run the Project using Docker Compose**:
 
 ---
 
 ```sh
    make all
+
 ```
 
 ---
 
-6. **View Logs**:
+5. **View Logs**:
 
 ---
 
 ```sh
    make docker-log
+
 ```
 
 ---
 
-7. **Clean Up**:
+6. **Clean Up**:
 
 ---
 
 ```sh
    make clean
+
 ```
 
 ---
 
-8. **Stop the Docker Compose Services**:
+7. **Stop the Docker Compose Services**:
 
 ---
 
 ```sh
    make docker-compose-down
+
 ```
 
 ---
@@ -154,6 +152,7 @@ Sample search api is for patent number 11696523
 
 ```sh
 curl --location 'http://127.0.0.1:40051/api/v1/search?query=11696523'
+
 ```
 
 ---

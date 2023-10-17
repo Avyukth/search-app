@@ -3,8 +3,43 @@ services:
   server:
     image: search-app:${VERSION}
     container_name: search-app
+    depends_on:
+      - mongodb
     ports:
-      - "${PORT}:${PORT}"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
       - .env
     restart: unless-stopped
+
+  mongodb:
+    image: mongo:latest
+    container_name: ${MONGO_CONTAINER_NAME}
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    hostname: ${MONGODB_HOST}
+    ports:
+      - 27017:${MONGODB_PORT}
+    env_file:
+      - .env
+
+  # redis:
+  #   image: redis:latest
+  #   container_name: ${REDIS_CONTAINER_NAME}
+  #   command: redis-server --requirepass ${REDIS_PASSWORD}
+  #   ports:
+  #     - 6379:6379
+  #   volumes:
+  #     - redis-data:/data
+  #   restart: unless-stopped
+  #   environment:
+  #     REDIS_REPLICATION_MODE: master
+  #     ALLOW_EMPTY_PASSWORD: no
+  #     REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+volumes:
+  mongo-data:
+  # redis-data:
