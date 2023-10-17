@@ -2,9 +2,6 @@ package config
 
 import (
 	"fmt"
-	// "log"
-	// "os"
-	// "strconv"
 	"github.com/spf13/viper"
 	"time"
 )
