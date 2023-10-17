@@ -19,13 +19,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.21
 
       - name: Run tests
         run: make test
-
-      - name: Build DB
-        run: make build-db
 
       - name: Build Docker Image
         run: make build
