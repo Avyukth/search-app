@@ -34,7 +34,8 @@ type RedisConfig struct {
 
 // ServerConfig holds the configuration related to the Server.
 type ServerConfig struct {
-	Port               int
+	ServiceHost        string
+	ServicePort        int
 	Server             string
 	IndexDirectory     string
 	DataStoreDirectory string
@@ -106,7 +107,8 @@ func LoadConfig() (*Config, error) {
 			ContainerName: viper.GetString("REDIS_CONTAINER_NAME"),
 		},
 		ServerConfig: ServerConfig{
-			Port:               viper.GetInt("SERVER_PORT"),
+			ServiceHost:        viper.GetString("SERVER_HOST"),
+			ServicePort:        viper.GetInt("SERVER_PORT"),
 			Server:             viper.GetString("SERVER_HOST"),
 			IndexDirectory:     viper.GetString("INDEX_DIRECTORY"),
 			DataStoreDirectory: viper.GetString("DATA_STORE_DIRECTORY"),

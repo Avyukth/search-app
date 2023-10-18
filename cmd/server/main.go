@@ -69,8 +69,9 @@ func main() {
 	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig)
 	wk := worker.NewWorker(dl, parser, db, indexer)
 	q := queue.NewTaskQueue(10, wk)
-	swaggerURL := fmt.Sprintf("http://127.0.0.1:%d/docs/swagger.yaml", cfg.ServerConfig.Port)
+	swaggerURL := fmt.Sprintf("http://127.0.0.1:%d/docs/swagger.yaml",cfg.ServerConfig.ServicePort)
 
+	fmt.Println("*************************",swaggerURL)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	q.Start(ctx)
@@ -95,8 +96,8 @@ func main() {
 
 	// Start Server
 	go func() {
-		log.Printf("Starting Server on port %d", cfg.ServerConfig.Port)
-		if err := app.Listen(fmt.Sprintf(":%d", cfg.ServerConfig.Port)); err != nil {
+		log.Printf("Starting Server on port %d", cfg.ServerConfig.ServicePort)
+		if err := app.Listen(fmt.Sprintf(":%d", cfg.ServerConfig.ServicePort)); err != nil {
 			log.Fatalf("Error starting the app: %v", err)
 		}
 	}()
