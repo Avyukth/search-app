@@ -20,7 +20,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: "Search results returned successfully"
           content:
             application/json:
@@ -33,9 +33,9 @@ paths:
                   applicationDate: "2023-01-01"
                   issueDate: "2023-01-02"
                   designClass: "14-02"
-        '400':
+        "400":
           description: "Bad Request. Invalid input."
-        '500':
+        "500":
           description: "Internal Server Error."
 
   /download:
@@ -50,15 +50,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: "File downloaded and processed successfully"
-        '400':
+        "400":
           description: "Bad Request. Invalid input."
-        '404':
+        "404":
           description: "Not Found. Link is not live."
-        '409':
+        "409":
           description: "Conflict. Link is already processed or completed."
-        '500':
+        "500":
           description: "Internal Server Error."
 
   /crawl:
@@ -73,10 +73,9 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: "Crawler triggered successfully"
-        '400':
+        "400":
           description: "Bad Request. Invalid input."
-        '500':
+        "500":
           description: "Internal Server Error."
-

@@ -22,4 +22,7 @@ func SetupRoutes(app *fiber.App, db *mongo.Database, searchEngine *indexer.Searc
 	v1.Get("/search", handler.SearchHandler(db, searchEngine))
 	v1.Get("/download", handler.DownloadHandler(db, q))
 	v1.Get("/crawl", handler.CrawlerHandler(db, q))
+	v1.Get("/live", func(c *fiber.Ctx) error {
+		return c.SendString("OK")
+	})
 }
