@@ -26,6 +26,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
+	"github.com/gofiber/template/html/v2"
 	"github.com/joho/godotenv"
 )
 
@@ -111,7 +112,9 @@ func setupWorkerComponents(ctx context.Context, httpClient *http.Client, parser 
 }
 
 func setupFiberApp(cfg *config.Config) *fiber.App {
+	engine := html.New("./front-ui/templates", ".html")
 	app := fiber.New(fiber.Config{
+		Views: 				engine,
 		Prefork:               false,
 		CaseSensitive:         true,
 		StrictRouting:         true,

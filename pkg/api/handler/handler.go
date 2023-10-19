@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/avyukth/search-app/pkg/indexer"
 	"github.com/avyukth/search-app/pkg/queue"
 	"github.com/gofiber/fiber/v2"
+	//  "github.com/shurcooL/httpfs/html/vfstemplate"
+	// "html/template"
 )
 
 // DownloadHandler handles download requests for tar files
@@ -49,7 +52,6 @@ func SearchHandler(db *mongo.Database, searchEngine *indexer.SearchEngine) fiber
 
 		// Perform search operation using the search engine instance
 		results, err := searchEngine.SearchAndRetrievePatents(query)
-
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
@@ -70,5 +72,25 @@ func CrawlerHandler(db *mongo.Database, q *queue.TaskQueue) fiber.Handler {
 		}
 		q.Enqueue(task)
 		return c.SendString("Directory is sent for walking and processing")
+	}
+}
+
+func ViewSearchHandler(db *mongo.Database, searchEngine *indexer.SearchEngine) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Extract search parameters from the request
+		query := c.Query("ticker")
+		log.Println("query results: ", query)
+		// Perform search operation using the search engine instance
+		results, err := searchEngine.SearchAndRetrievePatents(query)
+		log.Println("Search results: ", results)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": true,
+				"msg":   err.Error(),
+			})
+		}
+		return c.Render("results", fiber.Map{
+			"Results": results,
+		})
 	}
 }

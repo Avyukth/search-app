@@ -36,6 +36,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
 # Copy the binary from builder stage
 COPY --from=builder /app/cmd/server/server /app/server
 COPY --from=builder /app/.env /app/.env
+COPY --from=builder /app/front-ui/ /app/front-ui/
 # Set Work Directory
 WORKDIR /app
 

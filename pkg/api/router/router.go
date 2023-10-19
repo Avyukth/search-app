@@ -1,6 +1,12 @@
 package router
 
 import (
+	// "net/http"
+	// "log"
+	// "os"
+	// "path/filepath"
+	// "html/template"
+
 	"github.com/avyukth/search-app/pkg/api/handler"
 	"github.com/avyukth/search-app/pkg/database/mongo"
 	"github.com/avyukth/search-app/pkg/indexer"
@@ -25,4 +31,12 @@ func SetupRoutes(app *fiber.App, db *mongo.Database, searchEngine *indexer.Searc
 	v1.Get("/live", func(c *fiber.Ctx) error {
 		return c.SendString("OK")
 	})
+	appView := app.Group("/view")
+	vv1 := appView.Group("/v1")
+	//go:generate swagger generate spec -o swagger.json
+	vv1.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{})
+	})
+
+	vv1.Get("/search", handler.ViewSearchHandler(db, searchEngine))
 }
