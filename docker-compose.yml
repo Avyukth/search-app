@@ -4,7 +4,7 @@ services:
     image: search-app:${VERSION}
     container_name: search-app
     ports:
-      - "${PORT}:${PORT}"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
       - .env
     restart: unless-stopped
