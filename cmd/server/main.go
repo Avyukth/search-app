@@ -146,7 +146,7 @@ func waitForShutdownSignal(app *fiber.App) {
 
 
 func startApp(app *fiber.App, cfg config.ServerConfig) {
-	addr:= fmt.Sprintf(":%d", cfg.Port)
+	addr:= fmt.Sprintf(":%d", cfg.ServicePort)
 	if err := app.Listen(addr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

@@ -32,7 +32,8 @@ type RedisConfig struct {
 
 // ServerConfig holds the configuration related to the Server.
 type ServerConfig struct {
-	Port               int
+	ServiceHost        string
+	ServicePort        int
 	Server             string
 	IndexDirectory     string
 	DataStoreDirectory string
@@ -72,7 +73,7 @@ func LoadConfig() (*Config, error) {
 			ContainerName: getEnv("REDIS_CONTAINER_NAME", "redis-search"),
 		},
 		ServerConfig: ServerConfig{
-			Port:               getEnvAsInt("PORT", 40051),
+			ServicePort:        getEnvAsInt("PORT", 40051),
 			Server:             getEnv("SERVER", "localhost"),
 			IndexDirectory:     getEnv("INDEX_DIRECTORY", "index"),
 			DataStoreDirectory: getEnv("DATA_STORE_DIRECTORY", "search-data"),
