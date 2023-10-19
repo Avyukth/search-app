@@ -73,8 +73,8 @@ func LoadConfig() (*Config, error) {
 			ContainerName: getEnv("REDIS_CONTAINER_NAME", "redis-search"),
 		},
 		ServerConfig: ServerConfig{
-			ServicePort:        getEnvAsInt("PORT", 40051),
-			Server:             getEnv("SERVER", "localhost"),
+			ServicePort:        getEnvAsInt("SERVER_PORT", 40051),
+			Server:             getEnv("SERVER_HOST", "localhost"),
 			IndexDirectory:     getEnv("INDEX_DIRECTORY", "index"),
 			DataStoreDirectory: getEnv("DATA_STORE_DIRECTORY", "search-data"),
 			Storage:            getEnv("STORAGE_DIRECTORY", "storage"),
