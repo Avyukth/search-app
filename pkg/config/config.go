@@ -8,6 +8,8 @@ import (
 )
 
 type MongoDBConfig struct {
+	Host                  string
+	Port                  int
 	Username              string
 	Password              string
 	URI                   string
@@ -50,8 +52,10 @@ type Config struct {
 func LoadConfig() (*Config, error) {
 	return &Config{
 		MongoDBConfig: MongoDBConfig{
-			Username:              getEnv("MONGO_USERNAME", "root"),
-			Password:              getEnv("MONGO_PASSWORD", "example"),
+			Host:                  getEnv("MONGODB_HOST", "localhost"),
+			Port:                  getEnvAsInt("MONGODB_PORT", 27017),
+			Username:              getEnv("MONGODB_USERNAME", "root"),
+			Password:              getEnv("MONGODB_PASSWORD", "example"),
 			URI:                   getEnv("MONGODB_URI", "mongodb://%s:%s@localhost:27017"),
 			Database:              getEnv("MONGODB_DATABASE", "searchDB"),
 			MaxPoolSize:           getEnvAsUInt("MONGODB_MAX_POOL_SIZE", 10),
