@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
+	// "errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -24,89 +24,214 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 )
 
+type AppConfig struct {
+	ListenAddr   string
+	ServiceName string
+	ServiceVersion string
+	FiberConfig  fiber.Config
+}
 
+
+// func main() {
+// 	// Load Configuration
+// 	cfg, err := config.LoadConfig()
+// 	if err != nil {
+// 		log.Fatalf("Error loading configurations: %v", err)
+// 	}
+
+
+// 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+// 	defer stop()
+
+// 	otelShutdown, err := appTrace.SetupOTelSDK(ctx, cfg.ServerConfig.ServiceName, cfg.ServerConfig.ServiceVersion)
+
+// 	defer func() {
+// 		err = errors.Join(err, otelShutdown(context.Background()))
+// 	}()
+
+// 	// Setup Database Connection
+// 	db, err := mongo.SetupDatabase(cfg)
+// 	if err != nil {
+// 		log.Fatalf("Error setting up database: %v", err)
+// 	}
+// 	defer db.Client.Disconnect(context.TODO())
+
+// 	// Initialize components
+// 	httpClient := &http.Client{Timeout: 30 * time.Second,}
+// 	parser := parser.NewParser()
+
+// 	indexer, err := indexer.NewSearchEngine(cfg.ServerConfig.Storage + cfg.ServerConfig.IndexDirectory)
+// 	if err != nil {
+// 		log.Fatalf("Error loading configurations: %v", err)
+// 	}
+
+// 	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig)
+// 	wk := worker.NewWorker(dl, parser, db, indexer)
+// 	q := queue.NewTaskQueue(10, wk)
+// 	swaggerURL := fmt.Sprintf("/docs/swagger.yaml")
+
+// 	ctx, cancel := context.WithCancel(context.Background())
+// 	defer cancel()
+// 	q.Start(ctx)
+
+// 	//testing
+// 	// Setup Fiber App
+// 	app := fiber.New(fiber.Config{
+// 		Prefork:       false,
+// 		CaseSensitive: true,
+// 		StrictRouting: true,
+// 	})
+
+// 	app.Static("/docs", "./docs")
+// 	app.Use(cors.New())
+
+// 	app.Get("/swagger/*", swagger.New(swagger.Config{
+// 		URL: swaggerURL,
+// 	}))
+
+// 	// Setup Router
+// 	router.SetupRoutes(app, db, indexer, q)
+
+
+// 	appConfig :=  AppConfig{
+// 		ListenAddr: fmt.Sprintf(":%d", cfg.ServerConfig.ServicePort),
+// 		ServiceName: cfg.ServerConfig.ServiceName,
+// 		ServiceVersion: cfg.ServerConfig.ServiceVersion,
+// 		FiberConfig: fiber.Config{
+// 			Prefork:               false,
+// 			ServerHeader:          "Fiber",
+// 			ReadTimeout:           time.Second,
+// 			WriteTimeout:          10 * time.Second,
+// 			DisableStartupMessage: false,
+// 		},
+// 	}
+
+
+// 	go startApp(app, appConfig.ListenAddr)
+
+// 	// Wait for interrupt signal to gracefully shut down the server.
+// 	waitForShutdownSignal(app)
+
+// }
 func main() {
-	// Load .env file from current directory
-	if err := godotenv.Load(); err != nil {
-		log.Println("Error loading .env file")
-	}
+	cfg := loadConfig()
+	ctx := setupContext()
 
-	// Load Configuration
+	otelShutdown := setupTracing(ctx, cfg)
+	defer shutdownTracing(ctx, otelShutdown)
+
+	db := setupDatabase(cfg)
+	defer db.Client.Disconnect(ctx)
+
+	httpClient, parser, indexer := initializeComponents(cfg)
+	q := setupWorkerComponents(httpClient, parser, db, indexer, cfg)
+	defer q.Stop()
+
+	app := setupFiberApp(cfg)
+	router.SetupRoutes(app, db, indexer, q)
+
+
+	go startApp(app, cfg.ServerConfig)
+	waitForShutdownSignal(app)
+}
+
+func loadConfig() *config.Config {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Error loading configurations: %v", err)
 	}
+	return cfg
+}
 
-
+func setupContext() context.Context {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
+	return ctx
+}
 
+func setupTracing(ctx context.Context, cfg *config.Config) func(context.Context) error {
 	otelShutdown, err := appTrace.SetupOTelSDK(ctx, cfg.ServerConfig.ServiceName, cfg.ServerConfig.ServiceVersion)
+	if err != nil {
+		log.Fatalf("Error setting up tracing: %v", err)
+	}
+	return otelShutdown
+}
 
-	defer func() {
-		err = errors.Join(err, otelShutdown(context.Background()))
-	}()
+func shutdownTracing(ctx context.Context, otelShutdown func(context.Context) error) {
+	if err := otelShutdown(ctx); err != nil {
+		log.Fatalf("Error shutting down tracing: %v", err)
+	}
+}
 
-	// Setup Database Connection
+func setupDatabase(cfg *config.Config) *mongo.Database {
 	db, err := mongo.SetupDatabase(cfg)
 	if err != nil {
 		log.Fatalf("Error setting up database: %v", err)
 	}
-	defer db.Client.Disconnect(context.TODO())
+	return db
+}
 
-	// Initialize components
-	httpClient := &http.Client{Timeout: 30 * time.Second,}
+func initializeComponents(cfg *config.Config) (*http.Client, *parser.Parser, *indexer.SearchEngine) {
+	httpClient := &http.Client{Timeout: 30 * time.Second}
 	parser := parser.NewParser()
-
 	indexer, err := indexer.NewSearchEngine(cfg.ServerConfig.Storage + cfg.ServerConfig.IndexDirectory)
 	if err != nil {
-		log.Fatalf("Error loading configurations: %v", err)
+		log.Fatalf("Error initializing indexer: %v", err)
 	}
+	return httpClient, parser, indexer
+}
 
+func setupWorkerComponents(httpClient *http.Client, parser *parser.Parser, db *mongo.Database, indexer *indexer.SearchEngine, cfg *config.Config) (*queue.TaskQueue) {
 	dl := downloader.NewDownloader(httpClient, &cfg.ServerConfig)
 	wk := worker.NewWorker(dl, parser, db, indexer)
 	q := queue.NewTaskQueue(10, wk)
-	swaggerURL := fmt.Sprintf("http://127.0.0.1:%d/docs/swagger.yaml",cfg.ServerConfig.ServicePort)
-
-	fmt.Println("*************************",swaggerURL)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	q.Start(ctx)
-
-	//testing
-	// Setup Fiber App
-	app := fiber.New(fiber.Config{
-		Prefork:       false,
-		CaseSensitive: true,
-		StrictRouting: true,
-	})
-
-	app.Static("/docs", "./docs")
-	app.Use(cors.New())
-
-	app.Get("/swagger/*", swagger.New(swagger.Config{
-		URL: swaggerURL,
-	}))
-
-	// Setup Router
-	router.SetupRoutes(app, db, indexer, q)
-
-	// Start Server
-	go func() {
-		log.Printf("Starting Server on port %d", cfg.ServerConfig.ServicePort)
-		if err := app.Listen(fmt.Sprintf(":%d", cfg.ServerConfig.ServicePort)); err != nil {
-			log.Fatalf("Error starting the app: %v", err)
-		}
-	}()
-
-	// Graceful Shutdown
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	_ = <-c
-	log.Println("Graceful Shutdown...")
-	_ = app.Shutdown()
+	return  q
 }
 
+func setupFiberApp(cfg *config.Config) *fiber.App {
+	app := fiber.New(fiber.Config{
+		Prefork:               false,
+		CaseSensitive:         true,
+		StrictRouting:         true,
+		ServerHeader:          "Fiber",
+		ReadTimeout:           time.Second,
+		WriteTimeout:          10 * time.Second,
+		DisableStartupMessage: false,
+	})
+	app.Static("/docs", "./docs")
+	app.Use(cors.New())
+	swaggerURL := "/docs/swagger.yaml"
+	app.Get("/swagger/*", swagger.New(swagger.Config{URL: swaggerURL}))
+	return app
+}
+
+
+func waitForShutdownSignal(app *fiber.App) {
+	// Create a channel to listen for interrupt or terminate signals.
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	// Block until we receive a signal.
+	<-c
+
+	// Attempt to gracefully shut down the server.
+	log.Println("Gracefully shutting down...")
+	if err := app.Shutdown(); err != nil {
+		log.Fatalf("Error shutting down server: %v", err)
+	}
+	log.Println("Server shutdown complete")
+}
+
+
+func startApp(app *fiber.App, cfg config.ServerConfig) {
+	addr:= fmt.Sprintf(":%d", cfg.ServicePort)
+	if err := app.Listen(addr); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+}
