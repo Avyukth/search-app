@@ -9,7 +9,7 @@ services:
       - .env
     restart: unless-stopped
     volumes:
-      - server-data:/app/storage # Define a named volume called "server-data"
+      - server-data:/app/storage
 
 volumes:
-  server-data: # Define the named volume "server-data"
+  server-data:
