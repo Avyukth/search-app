@@ -27,7 +27,7 @@ build: build-db
 	--build-arg BUILD_REF=$(VERSION) \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	.
-build-ind: 
+build-search: 
 	DOCKER_BUILDKIT=1 docker build \
 	--no-cache \
 	-f $(DOCKERFILE) \
