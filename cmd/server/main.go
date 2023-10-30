@@ -31,6 +31,8 @@ import (
 )
 
 
+var build =  "development"
+
 
 func main() {
 	// var wg sync.WaitGroup

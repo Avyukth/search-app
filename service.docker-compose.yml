@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  server:
+    image: search-app:${VERSION}
+    container_name: search-app
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    restart: unless-stopped
