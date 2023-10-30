@@ -2,7 +2,8 @@ SHELL := /bin/bash
 VERSION := 1.0
 DOCKERFILE := Dockerfile
 IMAGE_NAME := search-app
-
+KIND            := kindest/node:v1.28.0
+KIND_CLUSTER := "kind-deployment-cluster"
 # =================================================================
 # Run Commands
 # =================================================================
@@ -53,3 +54,21 @@ docker-log:
 	docker logs --tail 100 -f $(IMAGE_NAME)
 
 all: build docker-run
+
+
+kind-up:
+	kind create cluster \
+		--image $(KIND) \
+		--name $(KIND_CLUSTER) \
+		--config deployment/k8s/kind/kind-config.yaml
+	kubectl config set-context --current --namespace=search-system
+
+
+kind-down:
+	kind delete cluster --name $(KIND_CLUSTER)
+
+
+kind-status:
+	kubectl get nodes -o wide
+	kubectl get svc -o wide
+	kubectl get pods -o wide --watch --all-namespaces
