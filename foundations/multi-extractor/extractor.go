@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 type Archive struct {
@@ -42,7 +43,6 @@ func extractTar(archive Archive) error {
 			}
 			fmt.Println("Created directory:", targetPath)
 		} else {
-			// Ensure parent directories exist
 			if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
 				return err
 			}
@@ -103,59 +103,75 @@ func extractZip(archive Archive) error {
 	return nil
 }
 
-func extractRecursively(archivePath string, destPath string) error {
+func extractRecursively(archivePath string, destPath string, doneCh chan bool, errCh chan error) {
 	var childArchives []Archive
 
-	// Strip the file extension from the archive name to form the extraction directory name.
 	archiveNameWithoutExtension := strings.TrimSuffix(filepath.Base(archivePath), filepath.Ext(archivePath))
 	extractDestPath := filepath.Join(destPath, archiveNameWithoutExtension)
 
+	var err error
 	if strings.HasSuffix(strings.ToLower(archivePath), ".tar") {
-		if err := extractTar(Archive{Path: archivePath, Dest: extractDestPath}); err != nil {
-			return err
-		}
+		err = extractTar(Archive{Path: archivePath, Dest: extractDestPath})
 	} else if strings.HasSuffix(strings.ToLower(archivePath), ".zip") {
-		if err := extractZip(Archive{Path: archivePath, Dest: extractDestPath}); err != nil {
-			return err
-		}
+		err = extractZip(Archive{Path: archivePath, Dest: extractDestPath})
 	}
 
-	// Check the extracted content for child archives
-	err := filepath.Walk(extractDestPath, func(path string, info os.FileInfo, err error) error {
+	if err != nil {
+		errCh <- err
+		doneCh <- true
+		return
+	}
+
+	err = filepath.Walk(extractDestPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-
 		if strings.HasSuffix(strings.ToLower(info.Name()), ".tar") || strings.HasSuffix(strings.ToLower(info.Name()), ".zip") {
-			// Use the directory containing the current archive as the destination for child archives.
 			childArchives = append(childArchives, Archive{Path: path, Dest: filepath.Dir(path)})
 		}
 		return nil
 	})
 
 	if err != nil {
-		return err
+		errCh <- err
+		doneCh <- true
+		return
 	}
 
-	// Process child archives
+	wg := &sync.WaitGroup{}
 	for _, childArchive := range childArchives {
-		if err := extractRecursively(childArchive.Path, childArchive.Dest); err != nil {
-			return err
-		}
-		// Remove the archive file after extracting to prevent re-processing in subsequent iterations
+		wg.Add(1)
+		go func(archive Archive) {
+			defer wg.Done()
+			extractRecursively(archive.Path, archive.Dest, doneCh, errCh)
+		}(childArchive)
 		os.Remove(childArchive.Path)
 	}
 
-	return nil
+	// Wait for child extractions to complete
+	wg.Wait()
+
+	doneCh <- true
 }
 
 func main() {
 	archivePath := "/home/amrit/Documents/100Days/golang/Search-app/tmp-out/I20230711.tar"
 	destPath := "/home/amrit/Documents/100Days/golang/Search-app/tmp-out/output"
 
-	if err := extractRecursively(archivePath, destPath); err != nil {
-		fmt.Println("Error:", err)
-	} else {
-		fmt.Println("Extraction completed successfully.")
+	doneCh := make(chan bool, 10)
+	errCh := make(chan error, 10)
+
+	go extractRecursively(archivePath, destPath, doneCh, errCh)
+
+	// Monitor channels
+	for {
+		select {
+		case <-doneCh:
+			return
+		case err := <-errCh:
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+		}
 	}
 }
