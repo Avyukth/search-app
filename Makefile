@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 VERSION := 1.0
 DOCKERFILE := Dockerfile
-IMAGE_NAME := search-app
+IMAGE_NAME := search-api-amd64
 KIND            := kindest/node:v1.28.0
 KIND_CLUSTER := "kind-deployment-cluster"
 # =================================================================
@@ -67,8 +67,21 @@ kind-up:
 kind-down:
 	kind delete cluster --name $(KIND_CLUSTER)
 
+# kind-load:
+# 	kind load docker-image search-api-amd64:$(VERSION) --name $(KIND_CLUSTER)
 
 kind-status:
 	kubectl get nodes -o wide
 	kubectl get svc -o wide
 	kubectl get pods -o wide --watch --all-namespaces
+
+
+kind-load:
+	cd deployment/k8s/kind/search-pod; kustomize edit set image search-api-image=search-api-amd64:$(VERSION)
+	kind load docker-image search-api-amd64:$(VERSION) --name $(KIND_CLUSTER)
+
+
+kind-apply:
+	kustomize build deployment/k8s/kind/database-pod | kubectl apply -f -
+	kubectl wait --namespace=database-system --timeout=120s --for=condition=Available deployment/database-pod
+	# cat deployment/k8s/base/search-pod/base-search.yaml | kubectl apply -f -

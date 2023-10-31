@@ -57,3 +57,5 @@ _testmain.go
 .trunk
 storage/search-data/
 .vscode
+/tmp-out
+/localindex
