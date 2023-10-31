@@ -4,6 +4,7 @@ DOCKERFILE := Dockerfile
 IMAGE_NAME := search-api-amd64
 KIND            := kindest/node:v1.28.0
 KIND_CLUSTER := "kind-deployment-cluster"
+ENVIRONMENT := dev
 # =================================================================
 # Run Commands
 # =================================================================
@@ -82,6 +83,6 @@ kind-load:
 
 
 kind-apply:
-	kustomize build deployment/k8s/kind/database-pod | kubectl apply -f -
-	kubectl wait --namespace=database-system --timeout=120s --for=condition=Available deployment/database-pod
-	# cat deployment/k8s/base/search-pod/base-search.yaml | kubectl apply -f -
+	# kustomize build deployment/k8s/kind/mongo-pod/overlays/$(ENVIRONMENT) | kubectl apply -f -
+	# kubectl wait --namespace=pce-mongodb --timeout=120s --for=condition=Ready statefulset/pce-mongodb-replica
+	kustomize build deployment/k8s/services/search-service/overlays/$(ENVIRONMENT) | kubectl apply -f -
