@@ -5,6 +5,10 @@ resources:
 commonLabels:
   env: dev
 namePrefix: pce-
-namespace: pce-mongodb
-patches:
-  - path: ./patch-statefulset.yaml
+namespace: pce-search-system
+patchesStrategicMerge:
+  - ./kind-search-patch.yaml
+images:
+  - name: search-api-image
+    newName: search-api-amd64
+    newTag: "1.0"

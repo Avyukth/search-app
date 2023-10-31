@@ -1,8 +1,8 @@
 version: "3.8"
 services:
   server:
-    image: search-app:${VERSION}
-    container_name: search-app
+    image: search-api-amd64:${VERSION}
+    container_name: search-api
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
