@@ -8,3 +8,7 @@ namePrefix: pce-
 namespace: pce-mongodb
 patches:
   - path: ./patch-statefulset.yaml
+images:
+  - name: search-api-image
+    newName: search-api-amd64
+    newTag: "3.0"

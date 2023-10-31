@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-VERSION := 1.0
+VERSION := 3.0
 DOCKERFILE := Dockerfile
 IMAGE_NAME := search-api-amd64
 KIND            := kindest/node:v1.28.0
@@ -78,7 +78,7 @@ kind-status:
 
 
 kind-load:
-	cd deployment/k8s/kind/search-pod; kustomize edit set image search-api-image=search-api-amd64:$(VERSION)
+	cd deployment/k8s/kind/mongo-pod/overlays/$(ENVIRONMENT); kustomize edit set image search-api-image=search-api-amd64:$(VERSION)
 	kind load docker-image search-api-amd64:$(VERSION) --name $(KIND_CLUSTER)
 
 
