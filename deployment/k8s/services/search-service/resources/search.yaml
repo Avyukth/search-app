@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-pod
+spec:
+  selector:
+    matchLabels:
+      app: search
+  template:
+    metadata:
+      labels:
+        app: search
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      # initContainers:
+      #   - name: init-migrate
+      #     image: search-api-image
+      #     command: ["./admin"]
+      containers:
+        - name: search-api
+          image: search-api-image
+          ports:
+            - name: search-api
+              containerPort: 3000
+#             - name: search-api-debug
+#               containerPort: 4000
+#           readinessProbe:
+#             httpGet:
+#               path: /debug/readiness
+#               port: 4000
+#             initialDelaySeconds: 15
+#             periodSeconds: 15
+#             timeoutSeconds: 5
+#             successThreshold: 1
+#             failureThreshold: 2
+#           livenessProbe:
+#             httpGet:
+#               path: /debug/liveness
+#               port: 4000
+#             initialDelaySeconds: 30
+#             periodSeconds: 30
+#             timeoutSeconds: 5
+#             successThreshold: 1
+#             failureThreshold: 2
+#           env:
+#             - name: GOMAXPROCS
+#               valueFrom:
+#                 resourceFieldRef:
+#                   resource: limits.cpu
+#             - name: KUBERNETES_NAMESPACE
+#               valueFrom:
+#                 fieldRef:
+#                   fieldPath: metadata.namespace
+#             - name: KUBERNETES_POD_NAME
+#               valueFrom:
+#                 fieldRef:
+#                   fieldPath: metadata.name
+#             - name: KUBERNETES_POD_IP
+#               valueFrom:
+#                 fieldRef:
+#                   fieldPath: status.podIP
+#             - name: KUBERNETES_NODE_NAME
+#               valueFrom:
+#                 fieldRef:
+#                   fieldPath: spec.nodeName
