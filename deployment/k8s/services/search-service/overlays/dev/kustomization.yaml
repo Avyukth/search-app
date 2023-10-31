@@ -6,9 +6,9 @@ commonLabels:
   env: dev
 namePrefix: pce-
 namespace: pce-search-system
-patches:
-  - path: ./kind-search-patch.yaml
 images:
   - name: search-api-image
     newName: search-api-amd64
-    newTag: "1.0"
+    newTag: "1.5"
+patches:
+  - path: ./kind-search-patch.yaml

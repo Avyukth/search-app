@@ -86,3 +86,4 @@ kind-apply:
 	# kustomize build deployment/k8s/kind/mongo-pod/overlays/$(ENVIRONMENT) | kubectl apply -f -
 	# kubectl wait --namespace=pce-mongodb --timeout=120s --for=condition=Ready statefulset/pce-mongodb-replica
 	kustomize build deployment/k8s/services/search-service/overlays/$(ENVIRONMENT) | kubectl apply -f -
+	# kustomize build deployment/k8s/services/search-service/resources | kubectl apply -f -
