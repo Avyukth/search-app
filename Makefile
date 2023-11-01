@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-VERSION := 3.0
+VERSION := 1.0
 DOCKERFILE := Dockerfile
 IMAGE_NAME := search-api-amd64
 KIND            := kindest/node:v1.28.0
@@ -78,12 +78,27 @@ kind-status:
 
 
 kind-load:
-	cd deployment/k8s/kind/mongo-pod/overlays/$(ENVIRONMENT); kustomize edit set image search-api-image=search-api-amd64:$(VERSION)
-	kind load docker-image search-api-amd64:$(VERSION) --name $(KIND_CLUSTER)
+	cd deployment/k8s/kind/mongo-pod/overlays/$(ENVIRONMENT); kustomize edit set image search-api-image=$(IMAGE_NAME):$(VERSION)
+	kind load docker-image $(IMAGE_NAME):$(VERSION) --name $(KIND_CLUSTER)
 
 
-kind-apply:
-	# kustomize build deployment/k8s/kind/mongo-pod/overlays/$(ENVIRONMENT) | kubectl apply -f -
+db-apply:
+	kustomize build deployment/k8s/kind/mongo-pod/overlays/dev | kubectl apply -f -
 	# kubectl wait --namespace=pce-mongodb --timeout=120s --for=condition=Ready statefulset/pce-mongodb-replica
-	kustomize build deployment/k8s/services/search-service/overlays/$(ENVIRONMENT) | kubectl apply -f -
+	# kustomize build deployment/k8s/kind/services/search-service/overlays/$(ENVIRONMENT) | kubectl apply -f -
 	# kustomize build deployment/k8s/services/search-service/resources | kubectl apply -f -
+
+
+service-apply:
+	kustomize build deployment/k8s/kind/services/search-service/overlays/dev | kubectl apply -f -
+
+
+all-apply:
+	kind-load db-apply service-apply
+
+db-del:
+	kustomize build deployment/k8s/kind/mongo-pod/overlays/dev | kubectl delete -f -
+
+service-del:
+	kustomize build deployment/k8s/kind/services/search-service/overlays/dev | kubectl delete -f -
+

@@ -28,17 +28,38 @@ import (
 	"github.com/gofiber/swagger"
 	"github.com/gofiber/template/html/v2"
 	"github.com/joho/godotenv"
+	// "github.com/ardanlabs/conf"
 )
 
 
 var build =  "development"
 
 
+// func run() {
+// 	cfg := struct {
+// 			conf.Version
+// 			Web struct {
+// 				APIHost         string        `conf:"default:0.0.0.0:3000"`
+// 				DebugHost       string        `conf:"default:0.0.0.0:4000"`
+// 				ReadTimeout     time.Duration `conf:"default:5s"`
+// 				WriteTimeout    time.Duration `conf:"default:10s"`
+// 				IdleTimeout     time.Duration `conf:"default:120s"`
+// 				ShutdownTimeout time.Duration `conf:"default:20s"`
+// 			}
+// 		}{
+// 			Version: conf.Version{
+// 				SVN: build,
+// 				Desc:  "This is sales-api part of developing full production ready backend infrastructure Author: @Avyukth",
+// 			},
+// 		}
+// }
+
 func main() {
 	// var wg sync.WaitGroup
 	if err := godotenv.Load(); err != nil {
 		log.Println("Error loading .env file")
 	}
+
 	cfg := loadConfig()
 	ctx, stop := setupContext()
 	defer stop()

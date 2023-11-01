@@ -3,6 +3,7 @@ module github.com/avyukth/search-app
 go 1.21.1
 
 require (
+	github.com/ardanlabs/conf v1.5.0
 	github.com/blevesearch/bleve/v2 v2.3.10
 	github.com/clbanning/mxj/v2 v2.7.0
 	github.com/gofiber/fiber/v2 v2.50.0
