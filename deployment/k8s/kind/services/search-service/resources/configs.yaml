@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: search-api-config
+data:
+  mongo-uri: mongodb://%s:%s@pce-mongodb:27017/?directConnection=true
+  mongo-username: mongo-admin
