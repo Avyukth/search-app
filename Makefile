@@ -101,3 +101,9 @@ db-del:
 service-del:
 	kustomize build deployment/k8s/kind/services/search-service/overlays/dev | kubectl delete -f -
 
+
+
+# kustomize build deployment/k8s/kind/mongo-pod/crd/resources | kubectl apply -f -
+# kubectl apply -k deployment/k8s/kind/mongo-pod/resources --namespace pce-mongodb
+# kubectl apply -k deployment/k8s/kind/mongo-pod/manager --namespace pce-mongodb
+#  kubectl apply -k deployment/k8s/kind/mongo-pod/rbac --namespace pce-mongodb 
