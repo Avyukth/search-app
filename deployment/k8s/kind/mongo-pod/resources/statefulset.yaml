@@ -1,56 +1,40 @@
-apiVersion: apps/v1
-kind: StatefulSet
+---
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
 metadata:
-  name: mongodb-replica
+  name: example-mongodb
 spec:
-  serviceName: pce-mongodb
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mongo
-  template:
-    metadata:
-      labels:
-        app: mongo
-        selector: mongo
-    spec:
-      terminationGracePeriodSeconds: 30
-      serviceAccount: pce-mongo-account
-      containers:
-        - name: mongodb
-          image: docker.io/mongo:latest
-          command: ["/bin/sh"]
-          args: ["-c", "mongod --replSet=rs0 --bind_ip_all"]
-          resources:
-            limits:
-              cpu: 100m
-              memory: 200Mi
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          ports:
-            - name: mongo-port
-              containerPort: 27017
-          volumeMounts:
-            - name: mongo-data
-              mountPath: /data/db
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              valueFrom:
-                configMapKeyRef:
-                  key: username
-                  name: mongodb-config
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  key: password
-                  name: mongodb-config
-  volumeClaimTemplates:
-    - metadata:
-        name: mongo-data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
+  members: 3
+  type: ReplicaSet
+  version: "6.0.5"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: my-user
+      db: admin
+      passwordSecretRef: # a reference to the secret that will be used to generate the user's password
+        name: my-user-password
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: readWrite
+          db: searchDB
+        - name: dbAdmin
+          db: searchDB
+      scramCredentialsSecretName: my-scram
+  additionalMongodConfig:
+    storage.wiredTiger.engineConfig.journalCompressor: zlib
+
+# the user credentials will be generated from this secret
+# once the credentials are generated, this secret is no longer required
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-user-password
+type: Opaque
+stringData:
+  password: example

@@ -1,13 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+kind:
+  Kustomization
+  # - ../../crd/resources/kustomization.yaml
 resources:
-  - ../../resources
-commonLabels:
-  env: dev
-namePrefix: pce-
-namespace: pce-search-system
-patches:
-  - path: ./patch-statefulset.yaml
+  - ../../rbac/kustomization.yaml
+  - ../../manager/kustomization.yaml
+  - ../../resources/kustomization.yaml
 images:
   - name: search-api-image
     newName: search-api-amd64

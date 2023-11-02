@@ -1,11 +1,11 @@
+kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
 metadata:
-  name: mongo_role_binding
+  name: mongodb-database
 subjects:
   - kind: ServiceAccount
-    name: mongo-account
+    name: mongodb-database
 roleRef:
-  kind: ClusterRole
-  name: mongo-role
+  kind: Role
+  name: mongodb-database
   apiGroup: rbac.authorization.k8s.io
