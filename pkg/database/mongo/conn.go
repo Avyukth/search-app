@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/avyukth/search-app/pkg/config"
@@ -15,6 +16,7 @@ func SetupDatabase(cfg *config.Config) (*Database, error) {
 	defer cancel()
 
 	uri := fmt.Sprintf(cfg.MongoDBConfig.URI, cfg.MongoDBConfig.Username, cfg.MongoDBConfig.Password)
+	log.Println("Connecting to MongoDB at: ", uri)
 	clientOptions := options.Client().ApplyURI(uri).SetMaxPoolSize(cfg.MongoDBConfig.MaxPoolSize)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {

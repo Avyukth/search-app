@@ -4,3 +4,4 @@ metadata:
   name: mongodb-config
 data:
   username: mongo-admin
+  password: cGFzc3dvcmQxMjM=

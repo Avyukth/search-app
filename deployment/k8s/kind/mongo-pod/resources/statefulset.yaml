@@ -42,9 +42,9 @@ spec:
                   name: mongodb-config
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
-                secretKeyRef:
+                configMapKeyRef:
                   key: password
-                  name: mongodb-secret
+                  name: mongodb-config
   volumeClaimTemplates:
     - metadata:
         name: mongo-data

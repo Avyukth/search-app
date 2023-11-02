@@ -37,9 +37,9 @@ spec:
                   name: search-api-config
             - name: MONGODB_PASSWORD
               valueFrom:
-                secretKeyRef:
+                configMapKeyRef:
                   key: mongo-password
-                  name: search-api-secret
+                  name: search-api-config
 #             - name: search-api-debug
 #               containerPort: 4000
 #           readinessProbe:

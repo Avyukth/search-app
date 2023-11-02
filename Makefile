@@ -93,8 +93,7 @@ service-apply:
 	kustomize build deployment/k8s/kind/services/search-service/overlays/dev | kubectl apply -f -
 
 
-all-apply:
-	kind-load db-apply service-apply
+all-apply: kind-load db-apply service-apply
 
 db-del:
 	kustomize build deployment/k8s/kind/mongo-pod/overlays/dev | kubectl delete -f -

@@ -3,5 +3,6 @@ kind: ConfigMap
 metadata:
   name: search-api-config
 data:
-  mongo-uri: mongodb://%s:%s@pce-mongodb:27017/?directConnection=true
-  mongo-username: mongo-admin
+  mongo-uri: mongodb://%s:%s@example-mongodb-0.example-mongodb-svc.pce-mongodb.svc.cluster.local:27017,example-mongodb-1.example-mongodb-svc.pce-mongodb.svc.cluster.local:27017,example-mongodb-2.example-mongodb-svc.pce-mongodb.svc.cluster.local:27017/admin?replicaSet=example-mongodb&ssl=false
+  mongo-username: my-user
+  mongo-password: example
