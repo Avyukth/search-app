@@ -78,7 +78,7 @@ kind-status:
 
 
 kind-load:
-	cd deployment/k8s/kind/mongo-pod/overlays/$(ENVIRONMENT); kustomize edit set image search-api-image=$(IMAGE_NAME):$(VERSION)
+	kustomize edit set image search-api-image=$(IMAGE_NAME):$(VERSION)
 	kind load docker-image $(IMAGE_NAME):$(VERSION) --name $(KIND_CLUSTER)
 
 
