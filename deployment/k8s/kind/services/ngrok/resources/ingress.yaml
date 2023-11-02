@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: search-app-ingress
+  namespace: pce-search-system
+spec:
+  ingressClassName: ngrok
+  rules:
+    - host: glowing-mutually-dingo.ngrok-free.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pce-search-api
+                port:
+                  number: 3000
